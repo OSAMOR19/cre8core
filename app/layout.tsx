@@ -30,7 +30,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${montserrat.variable} ${roboto.variable} ${nunito.variable} `}
+        className={`${montserrat.variable} ${roboto.variable} ${nunito.variable} bg-[#F8F8F8]`}
       >
         <ClientLayout>{children}</ClientLayout>
       </body>

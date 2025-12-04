@@ -157,3 +157,10 @@
     font-family: "Roboto", sans-serif;
   }
 }
+
+.footer_bg {
+  background-image: url("/images/footerbase.svg");
+  background-size: contain; /* or contain, depending on design */
+  background-repeat: no-repeat;
+  background-position: center;
+}
