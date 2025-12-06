@@ -26,7 +26,7 @@ const CreateJobPage = () => {
     setSkills(skills.filter((s) => s !== item));
   };
   return (
-    <div className="border p-6 max-w-[60%] my-16 rounded-2xl mx-auto">
+    <div className="border p-6 max-w-[80%] my-16 rounded-2xl mx-auto">
       <div>
         <div>
           <h1 className="text-[32px] font-bold">Post a Job</h1>
@@ -57,7 +57,7 @@ const CreateJobPage = () => {
                   placeholder="e.g  Senior smart contract developer"
                 />
               </div>
-              <div className="w-full flex gap-4">
+              <div className="w-full flex flex-col md:flex-row items-center gap-4">
                 <div className="w-full flex flex-col space-y-2">
                   <label htmlFor="companyName" className=" font-medium">
                     Company Name
@@ -81,7 +81,7 @@ const CreateJobPage = () => {
                   />
                 </div>
               </div>
-              <div className="w-full flex gap-4">
+              <div className="w-full flex flex-col md:flex-row items-center gap-4">
                 <div className="w-full flex flex-col space-y-2">
                   <label htmlFor="workType" className=" font-medium">
                     Work Type
@@ -195,7 +195,7 @@ const CreateJobPage = () => {
                 <label className="block mb-2 font-medium">Skills</label>
 
                 {/* Input Row */}
-                <div className="flex items-center gap-3 border rounded-lg p-3">
+                <div className="flex flex-col md:flex-row items-center gap-3 border rounded-lg p-3">
                   <input
                     type="text"
                     placeholder="Add a skill"
@@ -232,15 +232,15 @@ const CreateJobPage = () => {
                 </div>
               </div>
 
-              <div className="w-full flex items-center gap-4">
+              <div className="w-full flex flex-col md:flex-row items-center gap-4">
                 <button
                   type="submit"
-                  className="bg-[#E4B95C] text-black py-3  rounded-3xl text-sm hover:bg-[#E4B95C]/50 flex-1"
+                  className="bg-[#E4B95C] w-full text-black py-3  rounded-3xl text-sm hover:bg-[#E4B95C]/50 flex-1"
                 >
                   Save Changes
                 </button>
                 <button
-                  className="w-[300px] border py-3 rounded-3xl border-[#E4B95C] text-sm text-black hover:bg-[#E4B95C]/10 "
+                  className="w-full md:w-[300px] border py-3 rounded-3xl border-[#E4B95C] text-sm text-black hover:bg-[#E4B95C]/10 "
                   type="button"
                 >
                   Cancel

@@ -395,7 +395,7 @@ export default function JobsPage() {
             Hand-picked positions from top companies in the BASE ecosystem
           </p>
         </div>
-        <div className="grid grid-cols-3 gap-10 mt-10 max-w-[90%] mx-auto">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-10 mt-10 max-w-[90%] mx-auto">
           {opportunities.map((opportunity) => (
             <JobCard
               JobTitle={opportunity.JobTitle}
