@@ -25,11 +25,11 @@ const BountyCard = ({
 }: BountyCardProps) => {
   return (
     <div className="border border-[#66666624] rounded-2xl p-6 bg-white space-y-4 shadow hover:shadow-md transition-shadow duration-300">
-      <div className="flex justify-between items-center">
-        <div className="flex  ">
+      <div className="flex flex-col md:flex-row md:items-center justify-between items-center">
+        <div className="flex flex-col md:flex-row md:items-center gap-4">
           <img src={img || "/images/bounty.svg"} alt="Bounty" />
-          <span className="ml-4 flex flex-col justify-between">
-            <span className="flex gap-4 text-sm text-gray-500 items-center">
+          <span className="md:ml-4 flex flex-col justify-between">
+            <span className="flex justify-between md:justify-start gap-4 text-sm text-gray-500 items-center">
               <span className="px-4 py-2 rounded-4xl border border-[#E4B95C]">
                 {category || "Bounty"}
               </span>
@@ -40,8 +40,8 @@ const BountyCard = ({
             </span>
           </span>
         </div>
-        <div className="flex flex-col gap-2 text-right text-sm ">
-          <span className="flex text-[#9B6A00] items-center gap-2 font-light text-2xl">
+        <div className="hidden md:flex flex-col gap-2 md:text-right text-sm ">
+          <span className="flex text-[#9B6A00] md:items-center gap-2 font-light text-2xl">
             <TbMoneybag />
             <span>{amount || "1000 USDC"}</span>
           </span>

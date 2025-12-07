@@ -1,9 +1,12 @@
+"use client";
+
 import { Button } from "@/components/ui/button";
-import Image from "next/image";
-import React from "react";
 import BrowseBounties from "./BrowseBounties";
+import { useRouter } from "next/navigation";
 
 const MainContent = () => {
+  const router = useRouter();
+
   return (
     <div>
       <div
@@ -20,10 +23,10 @@ const MainContent = () => {
           marginBottom: "30px",
         }}
       >
-        <div className=" inset-0 flex items-center h-full">
+        <div className=" hidden inset-0 md:flex items-center h-full">
           <div className="max-w-md m-5">
             <div className=" flex flex-col text-white">
-              <h1 className="text-5xl text-[#D5DCEB] font-semibold mb-4 font-roboto leading-[1.2]">
+              <h1 className="text-2xl lg:text-5xl text-[#D5DCEB] font-semibold mb-4 font-roboto leading-[1.2]">
                 Cre8core Labs Fueling the Creative Layer of
                 <span className="text-[#EBB643]"> {""}BASE</span>
               </h1>
@@ -34,7 +37,10 @@ const MainContent = () => {
                 <Button className="bg-[#DCBD7A] hover:bg-[#d9a532] text-[#030406] font-medium px-8 py-6 rounded-full font-montserrat">
                   Become a creator
                 </Button>
-                <Button className="bg-transparent border border-[#DCBD7A] text-[#D9D9D9] hover:bg-white/10 font-medium px-8 py-6 rounded-full font-montserrat">
+                <Button
+                  onClick={() => router.push("/bounties/create")}
+                  className="bg-transparent border border-[#DCBD7A] text-[#D9D9D9] hover:bg-white/10 font-medium px-8 py-6 rounded-full font-montserrat"
+                >
                   Post a bounty
                 </Button>
               </div>

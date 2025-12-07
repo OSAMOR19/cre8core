@@ -62,10 +62,10 @@ const BrowseBounties = () => {
           <BsFunnel />
         </span>
       </div>
-      <div className="flex gap-4">
+      <div className="flex flex-wrap gap-2 md:gap-4">
         <button
           onClick={() => setTab("All")}
-          className={`px-10 py-2.5 border border-[#E4B95C] text-black rounded-4xl ${
+          className={`px-5 py-1 md:px-10 md:py-2.5 border border-[#E4B95C] text-black rounded-4xl ${
             tab === "All" ? "bg-[#E4B95C] text-white" : ""
           }`}
         >
@@ -73,7 +73,7 @@ const BrowseBounties = () => {
         </button>
         <button
           onClick={() => setTab("Video")}
-          className={`px-10 py-2.5 border border-[#E4B95C] text-black rounded-4xl ${
+          className={`px-5 py-1 md:px-10 md:py-2.5 border border-[#E4B95C] text-black rounded-4xl ${
             tab === "Video" ? "bg-[#E4B95C] text-white" : ""
           }`}
         >
@@ -81,7 +81,7 @@ const BrowseBounties = () => {
         </button>
         <button
           onClick={() => setTab("Meme")}
-          className={`px-10 py-2.5 border border-[#E4B95C] text-black rounded-4xl ${
+          className={`px-5 py-1 md:px-10 md:py-2.5 border border-[#E4B95C] text-black rounded-4xl ${
             tab === "Meme" ? "bg-[#E4B95C] text-white" : ""
           }`}
         >
@@ -89,7 +89,7 @@ const BrowseBounties = () => {
         </button>
         <button
           onClick={() => setTab("Threads")}
-          className={`px-5 py-3 border border-[#E4B95C] text-black rounded-4xl ${
+          className={`px-5 py-1 md:px-10 md:py-2.5 border border-[#E4B95C] text-black rounded-4xl ${
             tab === "Threads" ? "bg-[#E4B95C] text-white" : ""
           }`}
         >
@@ -97,7 +97,7 @@ const BrowseBounties = () => {
         </button>
         <button
           onClick={() => setTab("Sprints")}
-          className={`px-10 py-2.5 border border-[#E4B95C] text-black rounded-4xl ${
+          className={`px-5 py-1 md:px-10 md:py-2.5 border border-[#E4B95C] text-black rounded-4xl ${
             tab === "Sprints" ? "bg-[#E4B95C] text-white" : ""
           }`}
         >

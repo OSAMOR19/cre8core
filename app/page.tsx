@@ -8,10 +8,10 @@ export default function Home() {
   return (
     <div>
       <div className="max-w-[90%] mx-auto grid grid-cols-12 gap-8 px-8 my-5">
-        <div className="col-span-8">
+        <div className="col-span-full lg:col-span-8">
           <MainContent />
         </div>
-        <div className="border-l pl-5 col-span-4">
+        <div className="lg:border-l lg:pl-5 col-span-full lg:col-span-4">
           <SideContent />
         </div>
       </div>

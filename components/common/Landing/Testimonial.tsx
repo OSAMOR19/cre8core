@@ -68,7 +68,7 @@ const Testimonial = () => {
             through cre8core lab
           </p>
         </div>
-        <div className="grid grid-cols-3 gap-10 mt-10">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-10 mt-10">
           {data.map((item, index) => (
             <TestCards
               img={item.img}

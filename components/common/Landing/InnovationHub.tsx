@@ -79,7 +79,7 @@ const InnovationHub = () => {
             ecosystem.
           </p>
         </div>
-        <div className="grid grid-cols-4 gap-10">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-10">
           {hubs.map((hub, index) => (
             <HubCards
               key={index}
@@ -103,7 +103,7 @@ const InnovationHub = () => {
             innovation
           </p>
         </div>
-        <div className="flex flex-wrap items-center justify-between max-w-5xl mx-auto mt-5">
+        <div className="flex flex-wrap gap-2 items-center justify-between max-w-5xl mx-auto mt-5">
           <Image src={img1} alt="01" width={134} height={30} />
           <Image src={img2} alt="02" width={134} height={30} />
           <Image src={img3} alt="03" width={134} height={30} />
