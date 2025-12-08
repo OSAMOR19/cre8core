@@ -6,8 +6,10 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Menu, X } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 const Header = () => {
+  const router = useRouter();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false);
 
@@ -61,6 +63,7 @@ const Header = () => {
                 </Link>
                 <button
                   onClick={() => {
+                    router.push("/login");
                     setIsProfileDropdownOpen(false);
                     // Add logout logic here
                   }}
@@ -120,6 +123,20 @@ const Header = () => {
             onClick={() => setIsMobileMenuOpen(false)}
           >
             About
+          </Link>
+          <Link
+            href="/profile"
+            className="text-slate-700 font-medium"
+            onClick={() => setIsMobileMenuOpen(false)}
+          >
+            View Profile
+          </Link>
+          <Link
+            href="/login"
+            className="text-slate-700 font-medium"
+            onClick={() => setIsMobileMenuOpen(false)}
+          >
+            Log out
           </Link>
           <Button className="bg-[#EBB643] hover:bg-[#d9a532] text-slate-900 font-semibold rounded-full w-full">
             Connect Wallet

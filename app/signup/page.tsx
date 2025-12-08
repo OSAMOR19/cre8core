@@ -27,7 +27,7 @@ const Login = () => {
   const router = useRouter();
   return (
     <div className="min-h-screen grid grid-cols-12">
-      <div className="col-span-6">
+      <div className="hidden md:block md:col-span-6">
         <Image src={Logo} width={244} alt="Cre8core Logo" />
         <div className="px-6  -mt-11 flex flex-col space-y-6">
           <p className="italic text-[18px] font-light">
@@ -92,7 +92,7 @@ const Login = () => {
           </span>
         </div>
       </div>
-      <div className="col-span-6 bg-linear-to-r from-[#0C1F47] from-30% to-[#1D4CAD] text-white">
+      <div className="col-span-full md:col-span-6 bg-linear-to-r from-[#0C1F47] from-30% to-[#1D4CAD] text-white">
         <div className="w-[90%] mx-auto flex flex-col gap-12 py-16 justify-center h-full">
           <div className="flex flex-col space-y-2 items-center">
             <h3 className="text-[24px] font-semibold">Create Your Account!</h3>
