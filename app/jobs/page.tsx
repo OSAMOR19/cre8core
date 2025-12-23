@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useEffect, useState } from "react";
 import Image from "next/image";
 import {
   Search,
@@ -14,6 +14,9 @@ import { Button } from "@/components/ui/button";
 import { RxRocket } from "react-icons/rx";
 import FutureOfWeb3 from "@/components/common/Section/FutureOfWeb3";
 import { useRouter } from "next/navigation";
+import { motion } from "framer-motion";
+import { supabase } from "@/lib/supabase";
+import { Job } from "@/lib/types";
 
 // Mock Data
 const categories = [
@@ -26,7 +29,7 @@ const categories = [
 ];
 
 const featuredCompanies = [
-  { name: "CoinBase", positions: 12, logo: "CB" }, // Using text placeholder for logo if image not available
+  { name: "CoinBase", positions: 12, logo: "CB" },
   { name: "Uniswap Lab", positions: 8, logo: "UL" },
   { name: "Aave", positions: 5, logo: "Aa" },
   { name: "Chainlink", positions: 7, logo: "CL" },
@@ -41,57 +44,6 @@ const trendingSkills = [
   "NFTs",
   "Rust",
   "Go",
-];
-
-const jobs = [
-  {
-    id: 1,
-    title: "Senior Smart Contract Developer",
-    company: "Coinbase",
-    logo: "CB", // Placeholder
-    salary: "$180K - $250K",
-    equity: "+ Equity & Benefits",
-    location: "Remote",
-    posted: "2 days ago",
-    description:
-      "We're looking for an experienced Smart Contract Developer to join our BASE ecosystem team. You'll be responsible for designing and implementing secure, scalable smart contracts that power next-generation DeFi applications.",
-    tags: ["Solidity", "Hardhat", "DeFi", "Security Audits"],
-    applicants: 24,
-    closesIn: "3 days",
-    color: "bg-blue-100 text-blue-600", // For logo placeholder
-  },
-  {
-    id: 2,
-    title: "Senior Product Designer",
-    company: "Uniswap Labs",
-    logo: "UL",
-    salary: "$120K - $160K",
-    equity: "+ Equity",
-    location: "New York, NY",
-    posted: "1 day ago",
-    description:
-      "Join our design team to create intuitive, beautiful interfaces for DeFi applications on BASE. You'll work closely with engineers and product managers to deliver exceptional user experiences.",
-    tags: ["Figma", "UI/UX", "Design Systems", "Web3 UX"],
-    applicants: 18,
-    closesIn: "8 days",
-    color: "bg-pink-100 text-pink-600",
-  },
-  {
-    id: 3,
-    title: "Growth Marketing Manager",
-    company: "Aave",
-    logo: "Aa",
-    salary: "$90K - $130K",
-    equity: "+ Token Allocation",
-    location: "Remote",
-    posted: "3 days ago",
-    description:
-      "Drive user acquisition and engagement for our DeFi protocol on BASE. You'll develop and execute marketing strategies to grow our user base and increase protocol adoption.",
-    tags: ["Growth Hacking", "Analytics", "Community", "Content Marketing"],
-    applicants: 42,
-    closesIn: "5 days",
-    color: "bg-purple-100 text-purple-600",
-  },
 ];
 
 const opportunities = [
@@ -116,6 +68,15 @@ const opportunities = [
     description: "Remote Mid Level",
     color: "bg-[#9B6A00]",
   },
+];
+
+const companyLogos = [
+  "/images/01.svg",
+  "/images/02.svg",
+  "/images/03.svg",
+  "/images/04.svg",
+  "/images/05.svg",
+  "/images/06.svg",
 ];
 
 function JobCard({
@@ -157,8 +118,117 @@ function JobCard({
   );
 }
 
+const fadeInUp = {
+  initial: { opacity: 0, y: 20 },
+  animate: { opacity: 1, y: 0 },
+  transition: { duration: 0.5 },
+};
+
+const staggerContainer = {
+  animate: {
+    transition: {
+      staggerChildren: 0.1,
+    },
+  },
+};
+
 export default function JobsPage() {
   const router = useRouter();
+  const [jobsList, setJobsList] = useState<Job[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  // Fallback data in case DB is empty or not connected yet, to avoid broken UI in demo
+  const fallbackJobs: Job[] = [
+    {
+      id: "1",
+      created_at: new Date().toISOString(),
+      title: "Senior Smart Contract Developer",
+      company: "Coinbase",
+      logo_url: "CB",
+      salary_range: "$180K - $250K",
+      equity: "+ Equity & Benefits",
+      location: "Remote",
+      description: "We're looking for an experienced Smart Contract Developer...",
+      tags: ["Solidity", "Hardhat", "DeFi", "Security Audits"],
+      applicants_count: 24,
+      closes_in: "3 days",
+      color_theme: "bg-blue-100 text-blue-600"
+    },
+    {
+      id: "2",
+      created_at: new Date().toISOString(),
+      title: "Senior Product Designer",
+      company: "Uniswap Labs",
+      logo_url: "UL",
+      salary_range: "$120K - $160K",
+      equity: "+ Equity",
+      location: "New York, NY",
+      description: "Join our design team to create intuitive, beautiful interfaces...",
+      tags: ["Figma", "UI/UX", "Design Systems", "Web3 UX"],
+      applicants_count: 18,
+      closes_in: "8 days",
+      color_theme: "bg-pink-100 text-pink-600"
+    }
+  ];
+
+  useEffect(() => {
+    const fetchJobs = async () => {
+      try {
+        const { data, error } = await supabase
+          .from("jobs")
+          .select("*")
+          .order("created_at", { ascending: false });
+
+        if (error) {
+          console.error("Error fetching jobs:", error);
+          // If error (e.g. table doesn't exist yet), use fallback
+          setJobsList(fallbackJobs);
+        } else {
+          // Use DB data if success, even if empty
+          setJobsList(data || []);
+        }
+      } catch (err) {
+        console.error("Unexpected error:", err);
+        setJobsList(fallbackJobs);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchJobs();
+
+    // specific subscription for jobs table
+    const channel = supabase
+      .channel("jobs-realtime")
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "jobs",
+        },
+        (payload) => {
+          if (payload.eventType === "INSERT") {
+            setJobsList((prev) => [payload.new as Job, ...prev]);
+          } else if (payload.eventType === "UPDATE") {
+            setJobsList((prev) => prev.map(j => j.id === payload.new.id ? payload.new as Job : j));
+          } else if (payload.eventType === "DELETE") {
+            setJobsList((prev) => prev.filter(j => j.id !== payload.old.id));
+          }
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, []);
+
+  const getTimeAgo = (dateString: string) => {
+    const days = Math.floor((new Date().getTime() - new Date(dateString).getTime()) / (1000 * 3600 * 24));
+    return days === 0 ? "Today" : `${days} days ago`;
+  };
+
   return (
     <div className="min-h-screen bg-gray-50 ">
       {/* Hero Section */}
@@ -172,17 +242,28 @@ export default function JobsPage() {
         />
         <div className="absolute inset-0 bg-black/30 flex items-center">
           <div className="container mx-auto px-4">
-            <div className="max-w-5xl text-white">
-              <h1 className="text-5xl font-semibold mb-4 font-roboto leading-tight">
+            <motion.div
+              initial="initial"
+              animate="animate"
+              variants={staggerContainer}
+              className="max-w-5xl text-white"
+            >
+              <motion.h1
+                variants={fadeInUp}
+                className="text-5xl font-semibold mb-4 font-roboto leading-tight"
+              >
                 Find Your Next Web3 Career <br /> on{" "}
                 <span className="text-[#EBB643]">BASE</span>
-              </h1>
-              <p className="text-lg mb-8 font-montserrat text-gray-200">
+              </motion.h1>
+              <motion.p
+                variants={fadeInUp}
+                className="text-lg mb-8 font-montserrat text-gray-200"
+              >
                 Discover exciting opportunities with leading Web3 companies
                 building the future on BASE blockchain. From startups to
                 established protocols, find your perfect match.
-              </p>
-              <div className="flex gap-4">
+              </motion.p>
+              <motion.div variants={fadeInUp} className="flex gap-4">
                 <Button className="bg-[#EBB643] hover:bg-[#d9a532] text-white font-medium px-8 py-6 rounded-full font-montserrat">
                   Browse All Jobs
                 </Button>
@@ -192,15 +273,20 @@ export default function JobsPage() {
                 >
                   Post a Job
                 </Button>
-              </div>
-            </div>
+              </motion.div>
+            </motion.div>
           </div>
         </div>
       </div>
 
       <div className="container mx-auto px-4 mt-8 mb-10 relative z-10">
         {/* Search & Filter Bar */}
-        <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-100 mb-8 flex flex-col md:flex-row gap-4 items-center">
+        <motion.div
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.2 }}
+          className="bg-white p-4 rounded-xl shadow-sm border border-gray-100 mb-8 flex flex-col md:flex-row gap-4 items-center"
+        >
           <div className="relative grow">
             <Search
               className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
@@ -228,11 +314,16 @@ export default function JobsPage() {
               </button>
             ))}
           </div>
-        </div>
+        </motion.div>
 
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
           {/* Sidebar */}
-          <div className="lg:col-span-1 space-y-8">
+          <motion.div
+            initial={{ opacity: 0, x: -50 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: 0.3 }}
+            className="lg:col-span-1 space-y-8"
+          >
             {/* Job Categories */}
             <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
               <h3 className="text-lg font-bold text-slate-900 mb-4 font-montserrat">
@@ -240,7 +331,8 @@ export default function JobsPage() {
               </h3>
               <ul className="space-y-3">
                 {categories.map((cat) => (
-                  <li
+                  <motion.li
+                    whileHover={{ x: 5 }}
                     key={cat.name}
                     className="flex justify-between items-center text-sm group cursor-pointer"
                   >
@@ -250,7 +342,7 @@ export default function JobsPage() {
                     <span className="bg-gray-100 w-8 h-8 flex items-center justify-center text-gray-500 rounded-full text-xs font-medium group-hover:bg-[#EBB643]/10 group-hover:text-[#EBB643] transition-colors">
                       {cat.count}
                     </span>
-                  </li>
+                  </motion.li>
                 ))}
               </ul>
             </div>
@@ -262,7 +354,8 @@ export default function JobsPage() {
               </h3>
               <ul className="space-y-4">
                 {featuredCompanies.map((company) => (
-                  <li
+                  <motion.li
+                    whileHover={{ x: 5 }}
                     key={company.name}
                     className="flex items-center gap-3 cursor-pointer group"
                   >
@@ -277,7 +370,7 @@ export default function JobsPage() {
                         {company.positions} open positions
                       </p>
                     </div>
-                  </li>
+                  </motion.li>
                 ))}
               </ul>
             </div>
@@ -289,30 +382,46 @@ export default function JobsPage() {
               </h3>
               <div className="flex flex-wrap gap-2">
                 {trendingSkills.map((skill) => (
-                  <span
+                  <motion.span
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
                     key={skill}
                     className="px-3 py-1 bg-[#FFF9E6] text-[#B8860B] rounded-full text-xs font-medium border border-[#EBB643]/20 cursor-pointer hover:bg-[#EBB643] hover:text-white transition-colors font-roboto"
                   >
                     {skill}
-                  </span>
+                  </motion.span>
                 ))}
               </div>
             </div>
-          </div>
+          </motion.div>
 
           {/* Job Feed */}
-          <div className="lg:col-span-3 space-y-4">
-            {jobs.map((job) => (
-              <div
+          <motion.div
+            initial="initial"
+            animate="animate"
+            variants={staggerContainer}
+            className="lg:col-span-3 space-y-4"
+          >
+            {loading ? (
+              <div className="text-center py-10 font-montserrat text-gray-500">Loading jobs...</div>
+            ) : jobsList.map((job) => (
+              <motion.div
+                variants={fadeInUp}
+                whileHover={{ y: -5 }}
                 key={job.id}
                 className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 hover:shadow-md transition-shadow"
               >
                 <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-4 gap-4">
                   <div className="flex items-center gap-4">
                     <div
-                      className={`w-12 h-12 rounded-full flex items-center justify-center font-bold text-lg ${job.color}`}
+                      className={`w-12 h-12 rounded-full flex items-center justify-center font-bold text-lg ${job.color_theme || "bg-blue-100 text-blue-600"}`}
                     >
-                      {job.logo}
+                      {/* Check if logo_url is a URL or initials */}
+                      {job.logo_url && (job.logo_url.startsWith('http') || job.logo_url.startsWith('/')) ? (
+                        <img src={job.logo_url} alt={job.company} className="w-full h-full object-cover rounded-full" />
+                      ) : (
+                        job.logo_url || job.company.substring(0, 2).toUpperCase()
+                      )}
                     </div>
                     <div>
                       <h2 className="text-xl font-bold text-slate-900 font-nunito">
@@ -329,7 +438,7 @@ export default function JobsPage() {
                           </div>
                           <div className="flex items-center gap-1">
                             <Clock size={14} />
-                            <span>Posted {job.posted}</span>
+                            <span>Posted {getTimeAgo(job.created_at)}</span>
                           </div>
                         </div>
                       </div>
@@ -337,7 +446,7 @@ export default function JobsPage() {
                   </div>
                   <div className="text-right">
                     <div className="text-xl font-bold text-slate-900 font-montserrat">
-                      {job.salary}
+                      {job.salary_range}
                     </div>
                     <div className="text-xs text-gray-500 font-roboto">
                       {job.equity}
@@ -350,7 +459,7 @@ export default function JobsPage() {
                 </p>
 
                 <div className="flex flex-wrap gap-2 mb-6">
-                  {job.tags.map((tag) => (
+                  {job.tags && job.tags.map((tag) => (
                     <span
                       key={tag}
                       className="px-3 py-1 bg-[#E4B95C52] text-[#9B6A00] text-sm rounded-lg font-medium font-roboto"
@@ -364,27 +473,27 @@ export default function JobsPage() {
                   <div className="flex items-center gap-6 text-sm text-gray-500 font-roboto">
                     <div className="flex items-center gap-2">
                       <Users size={16} />
-                      <span>{job.applicants} applicants</span>
+                      <span>{job.applicants_count || 0} applicants</span>
                     </div>
                     <div className="flex items-center gap-2">
                       <Calendar size={16} />
-                      <span>Closes in {job.closesIn}</span>
+                      <span>Closes in {job.closes_in || "N/A"}</span>
                     </div>
                   </div>
                   <Button className="w-full md:w-auto bg-[#EBB643] hover:bg-[#d9a532] text-white font-medium px-8 rounded-full font-montserrat">
                     Apply now
                   </Button>
                 </div>
-              </div>
+              </motion.div>
             ))}
 
             <div className="flex flex-col items-center justify-center gap-2 font-montserrat mt-5">
               <Button className=" bg-[#EFEFEF] hover:bg-[#EFEFEF]/50 text-[#030406] font-medium px-8 rounded-full ">
                 Load More Jobs
               </Button>
-              <p>Showing 5 of 247 total jobs</p>
+              <p>Showing {jobsList.length} total jobs</p>
             </div>
-          </div>
+          </motion.div>
         </div>
       </div>
 
@@ -397,20 +506,34 @@ export default function JobsPage() {
             Hand-picked positions from top companies in the BASE ecosystem
           </p>
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-10 mt-10 max-w-[90%] mx-auto">
-          {opportunities.map((opportunity) => (
-            <JobCard
-              JobTitle={opportunity.JobTitle}
-              title={opportunity.title}
+        <motion.div
+          initial={{ opacity: 0 }}
+          whileInView={{ opacity: 1 }}
+          transition={{ duration: 0.8 }}
+          viewport={{ once: true }}
+          className="grid grid-cols-1 md:grid-cols-3 gap-10 mt-10 max-w-[90%] mx-auto"
+        >
+          {opportunities.map((opportunity, i) => (
+            <motion.div
               key={opportunity.JobTitle}
-              color={opportunity.color}
-              range={opportunity.range}
-              description={opportunity.description}
-            />
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ delay: i * 0.1, duration: 0.5 }}
+              viewport={{ once: true }}
+            >
+              <JobCard
+                JobTitle={opportunity.JobTitle}
+                title={opportunity.title}
+                color={opportunity.color}
+                range={opportunity.range}
+                description={opportunity.description}
+              />
+            </motion.div>
           ))}
-        </div>
+        </motion.div>
       </div>
-      <div className="bg-[#EFEFEF] p-12">
+
+      <div className="bg-[#EFEFEF] p-12 overflow-hidden">
         <div className="max-w-xl mx-auto text-center">
           <h4 className="text-2xl font-semibold mb-3">
             Companies Hiring on BASE
@@ -419,37 +542,30 @@ export default function JobsPage() {
             Join innovative teams building the future of Web3
           </p>
         </div>
-        <div className="flex flex-wrap mt-10 gap-10 justify-center items-center">
-          <img
-            src="/images/01.svg"
-            alt="Company 1"
-            className="  object-contain"
-          />
-          <img
-            src="/images/02.svg"
-            alt="Company 2"
-            className="  object-contain"
-          />
-          <img
-            src="/images/03.svg"
-            alt="Company 3"
-            className="  object-contain"
-          />
-          <img
-            src="/images/04.svg"
-            alt="Company 4"
-            className="  object-contain"
-          />
-          <img
-            src="/images/05.svg"
-            alt="Company 5"
-            className="  object-contain"
-          />
-          <img
-            src="/images/06.svg"
-            alt="Company 6"
-            className="  object-contain"
-          />
+
+        {/* Infinite Scroll Logo Marquee */}
+        <div className="relative mt-10 w-full overflow-hidden">
+          <div className="flex overflow-hidden">
+            <motion.div
+              className="flex gap-12 items-center flex-nowrap pr-12"
+              animate={{ x: ["0%", "-50%"] }}
+              transition={{
+                duration: 20,
+                ease: "linear",
+                repeat: Infinity
+              }}
+              style={{ width: "fit-content" }}
+            >
+              {[...companyLogos, ...companyLogos, ...companyLogos, ...companyLogos].map((src, i) => (
+                <img
+                  key={i}
+                  src={src}
+                  alt={`Company ${i}`}
+                  className="h-12 w-auto object-contain shrink-0 grayscale hover:grayscale-0 transition-all opacity-70 hover:opacity-100"
+                />
+              ))}
+            </motion.div>
+          </div>
         </div>
       </div>
 

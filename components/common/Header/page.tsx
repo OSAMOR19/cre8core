@@ -1,15 +1,17 @@
-import Image from "next/image";
-import Link from "next/link";
-import Logo from "../../../public/images/logo.png";
-import { IoIosArrowDown } from "react-icons/io";
+import { useAuth } from "@/components/providers/AuthProvider";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Menu, X } from "lucide-react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useState } from "react";
+import { IoIosArrowDown } from "react-icons/io";
+import Logo from "../../../public/images/logo.png";
+import Image from "next/image";
 
 const Header = () => {
   const router = useRouter();
+  const { user, signOut } = useAuth();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false);
 
@@ -38,42 +40,59 @@ const Header = () => {
           </ul>
         </div>
         <div className="hidden md:flex items-center gap-4">
-          <div className="relative">
-            <div
-              onClick={() => setIsProfileDropdownOpen(!isProfileDropdownOpen)}
-              className="flex items-center gap-1 cursor-pointer"
-            >
-              <Avatar>
-                <AvatarImage
-                  src="https://github.com/shadcn.png"
-                  alt="@shadcn"
-                />
-                <AvatarFallback>CN</AvatarFallback>
-              </Avatar>
-              <IoIosArrowDown size={10} />
-            </div>
-            {isProfileDropdownOpen && (
-              <div className="absolute right-0 top-full mt-2 w-48 bg-white border border-gray-100 shadow-lg rounded-lg z-50 py-2">
-                <Link
-                  href="/profile"
-                  className="block px-4 py-2 text-slate-700 hover:bg-gray-50 transition-colors font-montserrat"
-                  onClick={() => setIsProfileDropdownOpen(false)}
-                >
-                  View Profile
-                </Link>
-                <button
-                  onClick={() => {
-                    router.push("/login");
-                    setIsProfileDropdownOpen(false);
-                    // Add logout logic here
-                  }}
-                  className="w-full text-left px-4 py-2 text-slate-700 hover:bg-gray-50 transition-colors font-montserrat"
-                >
-                  Log Out
-                </button>
+          {user ? (
+            <div className="relative">
+              <div
+                onClick={() => setIsProfileDropdownOpen(!isProfileDropdownOpen)}
+                className="flex items-center gap-1 cursor-pointer"
+              >
+                <Avatar>
+                  <AvatarImage
+                    src={user.user_metadata?.avatar_url || "https://github.com/shadcn.png"}
+                    alt={user.user_metadata?.full_name || "User"}
+                  />
+                  <AvatarFallback className="uppercase">
+                    {user.email?.[0] || "U"}
+                  </AvatarFallback>
+                </Avatar>
+                <IoIosArrowDown size={10} />
               </div>
-            )}
-          </div>
+              {isProfileDropdownOpen && (
+                <div className="absolute right-0 top-full mt-2 w-48 bg-white border border-gray-100 shadow-lg rounded-lg z-50 py-2">
+                  <Link
+                    href="/profile"
+                    className="block px-4 py-2 text-slate-700 hover:bg-gray-50 transition-colors font-montserrat"
+                    onClick={() => setIsProfileDropdownOpen(false)}
+                  >
+                    View Profile
+                  </Link>
+                  <button
+                    onClick={() => {
+                      signOut();
+                      setIsProfileDropdownOpen(false);
+                      router.push("/");
+                    }}
+                    className="w-full text-left px-4 py-2 text-slate-700 hover:bg-gray-50 transition-colors font-montserrat"
+                  >
+                    Log Out
+                  </button>
+                </div>
+              )}
+            </div>
+          ) : (
+            <div className="flex items-center gap-3">
+              <Link href="/login">
+                <Button variant="ghost" className="text-slate-700 font-normal hover:bg-transparent hover:text-black">
+                  Log In
+                </Button>
+              </Link>
+              <Link href="/signup">
+                <Button className="bg-black text-white hover:bg-black/90 font-normal rounded-full px-6">
+                  Sign Up
+                </Button>
+              </Link>
+            </div>
+          )}
           <Button className="bg-[#EBB643] hover:bg-[#d9a532] text-slate-900 font-normal font-montserrat rounded-full px-6">
             Connect Wallet
           </Button>
@@ -124,20 +143,46 @@ const Header = () => {
           >
             About
           </Link>
-          <Link
-            href="/profile"
-            className="text-slate-700 font-medium"
-            onClick={() => setIsMobileMenuOpen(false)}
-          >
-            View Profile
-          </Link>
-          <Link
-            href="/login"
-            className="text-slate-700 font-medium"
-            onClick={() => setIsMobileMenuOpen(false)}
-          >
-            Log out
-          </Link>
+
+          {user ? (
+            <>
+              <Link
+                href="/profile"
+                className="text-slate-700 font-medium"
+                onClick={() => setIsMobileMenuOpen(false)}
+              >
+                View Profile
+              </Link>
+              <button
+                onClick={() => {
+                  signOut();
+                  setIsMobileMenuOpen(false);
+                  router.push("/");
+                }}
+                className="text-left text-slate-700 font-medium"
+              >
+                Log out
+              </button>
+            </>
+          ) : (
+            <div className="flex flex-col gap-2 pt-2 border-t mt-2">
+              <Link
+                href="/login"
+                className="text-slate-700 font-medium p-2 text-center border rounded-lg"
+                onClick={() => setIsMobileMenuOpen(false)}
+              >
+                Log In
+              </Link>
+              <Link
+                href="/signup"
+                className="text-white bg-black font-medium p-2 text-center rounded-lg"
+                onClick={() => setIsMobileMenuOpen(false)}
+              >
+                Sign Up
+              </Link>
+            </div>
+          )}
+
           <Button className="bg-[#EBB643] hover:bg-[#d9a532] text-slate-900 font-semibold rounded-full w-full">
             Connect Wallet
           </Button>
