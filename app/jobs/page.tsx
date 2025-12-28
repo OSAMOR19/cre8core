@@ -427,17 +427,34 @@ export default function JobsPage() {
                 <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-4 gap-4">
                   <div className="flex items-center gap-4">
                     <div
-                      className={`w-12 h-12 rounded-full flex items-center justify-center font-bold text-lg overflow-hidden ${job.logo_url && (job.logo_url.startsWith('http') || job.logo_url.startsWith('/'))
-                        ? "bg-white border border-gray-100"
-                        : (job.color_theme || "bg-blue-100 text-blue-600")
+                      className={`w-12 h-12 rounded-full flex items-center justify-center font-bold text-lg overflow-hidden ${(job.logo_url && (job.logo_url.startsWith('http') || job.logo_url.startsWith('/'))) ||
+                          (job.company && ["Coinbase", "Uniswap Labs", "Aave", "Chainlink", "BaseFi Protocol"].some(c => job.company.includes(c)))
+                          ? ""
+                          : (job.color_theme || "bg-blue-100 text-blue-600")
                         }`}
                     >
-                      {/* Check if logo_url is a URL or initials */}
-                      {job.logo_url && (job.logo_url.startsWith('http') || job.logo_url.startsWith('/')) ? (
-                        <img src={job.logo_url} alt={job.company} className="w-full h-full object-contain p-2" />
-                      ) : (
-                        job.logo_url || job.company.substring(0, 2).toUpperCase()
-                      )}
+                      {(() => {
+                        const logoMap: Record<string, string> = {
+                          "Coinbase": "/images/token-branded_coinbase.svg",
+                          "Uniswap Labs": "/images/uni.svg",
+                          "Aave": "/images/01.svg",
+                          "Chainlink": "/icons/chainlinkicon.svg",
+                          "BaseFi Protocol": "/images/token-branded_coinbase.svg", // Placeholder or same if related
+                          "BASE Labs": "/images/token-branded_coinbase.svg"
+                        };
+
+                        // normalize company name to match keys
+                        const companyKey = Object.keys(logoMap).find(key => job.company.includes(key));
+                        const mappedLogo = companyKey ? logoMap[companyKey] : null;
+
+                        if (job.logo_url && (job.logo_url.startsWith('http') || job.logo_url.startsWith('/'))) {
+                          return <img src={job.logo_url} alt={job.company} className="w-full h-full object-contain p-2" />;
+                        } else if (mappedLogo) {
+                          return <img src={mappedLogo} alt={job.company} className="w-full h-full object-contain p-2" />;
+                        } else {
+                          return job.logo_url || job.company.substring(0, 2).toUpperCase();
+                        }
+                      })()}
                     </div>
                     <div>
                       <h2 className="text-xl font-bold text-slate-900 font-nunito">
