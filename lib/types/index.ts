@@ -27,3 +27,28 @@ export interface Bounty {
     description: string;
     status: string;
 }
+
+export interface Profile {
+    id: string;
+    username: string;
+    full_name: string;
+    avatar_url?: string;
+    website?: string;
+    location?: string;
+    bio?: string;
+    skills?: string[];
+    role?: string;
+}
+
+export interface BountySubmission {
+    id: string;
+    bounty_id: string;
+    user_id: string;
+    status: 'pending' | 'in_progress' | 'submitted' | 'approved' | 'rejected';
+    submitted_at?: string;
+    earnings?: number; // Amount earned if approved
+    rating?: number; // 1-5 rating if approved
+
+    // Joined fields (optional, populated after fetch)
+    bounty?: Bounty;
+}

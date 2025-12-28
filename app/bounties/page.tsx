@@ -298,13 +298,15 @@ export default function BountiesPage() {
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.5 }}
-        className="flex flex-wrap gap-4"
+        className="flex gap-4 overflow-x-auto pb-4 md:flex-wrap md:overflow-visible no-scrollbar"
       >
         {["All", "Video", "Meme", "Threads", "Sprints"].map((category) => (
           <button
             key={category}
             onClick={() => setTab(category)}
-            className={`px-10 py-2.5 border border-[#E4B95C] text-black rounded-4xl transition-all duration-300 ${tab === category ? "bg-[#E4B95C] text-white transform scale-105" : "hover:bg-[#E4B95C]/10"
+            className={`px-6 py-2 md:px-10 md:py-2.5 whitespace-nowrap border border-[#E4B95C] text-black rounded-full font-medium transition-all duration-300 ${tab === category
+                ? "bg-[#E4B95C] text-slate-900 transform scale-105 shadow-md"
+                : "hover:bg-[#E4B95C]/10 bg-white"
               }`}
           >
             {category}

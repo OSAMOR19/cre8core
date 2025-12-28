@@ -25,47 +25,41 @@ const MainContent = () => {
   return (
     <div>
       <div
+        className="relative w-full rounded-3xl overflow-hidden border border-gray-200 mb-8 bg-cover bg-center bg-no-repeat min-h-[500px] md:min-h-0 md:aspect-[16/7]"
         style={{
           backgroundImage: 'url("/images/landing.png")',
-          backgroundSize: "cover",
-          backgroundPosition: "center",
-          backgroundRepeat: "no-repeat",
-          aspectRatio: "16 / 7", // or match your image ratio
-          width: "100%",
-          borderRadius: "24px",
-          border: "1px solid #E5E7EB",
-          padding: "20px",
-          marginBottom: "30px",
         }}
       >
-        <div className=" hidden inset-0 md:flex items-center h-full">
-          <div className="max-w-md m-5">
+        <div className="absolute inset-0 bg-black/40 md:bg-transparent" /> {/* Optional overlay for mobile readability */}
+
+        <div className="relative z-10 flex items-center h-full p-6 md:p-12">
+          <div className="max-w-md md:max-w-xl text-center md:text-left mx-auto md:mx-0">
             <motion.div
               initial="initial"
               animate="animate"
               variants={staggerContainer}
-              className=" flex flex-col text-white"
+              className="flex flex-col text-white"
             >
               <motion.h1
                 variants={fadeInUp}
-                className="text-2xl lg:text-5xl text-[#D5DCEB] font-semibold mb-4 font-roboto leading-[1.2]"
+                className="text-4xl md:text-5xl text-[#D5DCEB] font-semibold mb-6 font-roboto leading-[1.2]"
               >
                 Cre8core Labs Fueling the Creative Layer of
                 <span className="text-[#EBB643]"> {""}BASE</span>
               </motion.h1>
               <motion.p
                 variants={fadeInUp}
-                className="text-lg mb-8 font-montserrat text-gray-200"
+                className="text-lg md:text-xl mb-8 font-montserrat text-gray-200"
               >
                 One platform, infinite campaigns, endless creator rewards.
               </motion.p>
-              <motion.div variants={fadeInUp} className="flex gap-4">
-                <Button className="bg-[#DCBD7A] hover:bg-[#d9a532] text-[#030406] font-medium px-8 py-6 rounded-full font-montserrat transition-transform active:scale-95">
+              <motion.div variants={fadeInUp} className="flex flex-col sm:flex-row gap-4 justify-center md:justify-start">
+                <Button className="bg-[#DCBD7A] hover:bg-[#d9a532] text-[#030406] font-medium px-8 py-6 rounded-full font-montserrat text-lg transition-transform active:scale-95">
                   Become a creator
                 </Button>
                 <Button
                   onClick={() => router.push("/bounties/create")}
-                  className="bg-transparent border border-[#DCBD7A] text-[#D9D9D9] hover:bg-white/10 font-medium px-8 py-6 rounded-full font-montserrat transition-transform active:scale-95"
+                  className="bg-transparent border border-[#DCBD7A] text-[#D9D9D9] hover:bg-white/10 font-medium px-8 py-6 rounded-full font-montserrat text-lg transition-transform active:scale-95"
                 >
                   Post a bounty
                 </Button>

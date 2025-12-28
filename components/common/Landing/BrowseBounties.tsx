@@ -62,44 +62,39 @@ const BrowseBounties = () => {
           <BsFunnel />
         </span>
       </div>
-      <div className="flex flex-wrap gap-2 md:gap-4">
+      <div className="flex gap-2 overflow-x-auto md:flex-wrap md:overflow-visible pb-4 md:pb-0 no-scrollbar">
         <button
           onClick={() => setTab("All")}
-          className={`px-5 py-1 md:px-10 md:py-2.5 border border-[#E4B95C] text-black rounded-4xl ${
-            tab === "All" ? "bg-[#E4B95C] text-white" : ""
-          }`}
+          className={`px-6 py-2 md:px-10 md:py-2.5 whitespace-nowrap border border-[#E4B95C] text-black rounded-full transition-all ${tab === "All" ? "bg-[#E4B95C] text-white" : "bg-white hover:bg-[#E4B95C]/10"
+            }`}
         >
           All
         </button>
         <button
           onClick={() => setTab("Video")}
-          className={`px-5 py-1 md:px-10 md:py-2.5 border border-[#E4B95C] text-black rounded-4xl ${
-            tab === "Video" ? "bg-[#E4B95C] text-white" : ""
-          }`}
+          className={`px-6 py-2 md:px-10 md:py-2.5 whitespace-nowrap border border-[#E4B95C] text-black rounded-full transition-all ${tab === "Video" ? "bg-[#E4B95C] text-white" : "bg-white hover:bg-[#E4B95C]/10"
+            }`}
         >
           Video
         </button>
         <button
           onClick={() => setTab("Meme")}
-          className={`px-5 py-1 md:px-10 md:py-2.5 border border-[#E4B95C] text-black rounded-4xl ${
-            tab === "Meme" ? "bg-[#E4B95C] text-white" : ""
-          }`}
+          className={`px-6 py-2 md:px-10 md:py-2.5 whitespace-nowrap border border-[#E4B95C] text-black rounded-full transition-all ${tab === "Meme" ? "bg-[#E4B95C] text-white" : "bg-white hover:bg-[#E4B95C]/10"
+            }`}
         >
           Meme
         </button>
         <button
           onClick={() => setTab("Threads")}
-          className={`px-5 py-1 md:px-10 md:py-2.5 border border-[#E4B95C] text-black rounded-4xl ${
-            tab === "Threads" ? "bg-[#E4B95C] text-white" : ""
-          }`}
+          className={`px-6 py-2 md:px-10 md:py-2.5 whitespace-nowrap border border-[#E4B95C] text-black rounded-full transition-all ${tab === "Threads" ? "bg-[#E4B95C] text-white" : "bg-white hover:bg-[#E4B95C]/10"
+            }`}
         >
           Threads
         </button>
         <button
           onClick={() => setTab("Sprints")}
-          className={`px-5 py-1 md:px-10 md:py-2.5 border border-[#E4B95C] text-black rounded-4xl ${
-            tab === "Sprints" ? "bg-[#E4B95C] text-white" : ""
-          }`}
+          className={`px-6 py-2 md:px-10 md:py-2.5 whitespace-nowrap border border-[#E4B95C] text-black rounded-full transition-all ${tab === "Sprints" ? "bg-[#E4B95C] text-white" : "bg-white hover:bg-[#E4B95C]/10"
+            }`}
         >
           Sprints
         </button>

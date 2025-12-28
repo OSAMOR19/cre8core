@@ -3,7 +3,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Menu, X } from "lucide-react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useState } from "react";
 import { IoIosArrowDown } from "react-icons/io";
 import Logo from "../../../public/images/logo.png";
@@ -11,6 +11,7 @@ import Image from "next/image";
 
 const Header = () => {
   const router = useRouter();
+  const pathname = usePathname();
   const { user, signOut } = useAuth();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false);
@@ -30,13 +31,19 @@ const Header = () => {
         </Link>
         <div>
           <ul className="hidden md:flex gap-8 items-center text-sm font-light">
-            {menuNavigation?.map((item, index) => (
-              <li key={index}>
-                <Link className="flex items-center gap-1.5" href={item?.link}>
-                  {item?.name} {item?.submenu && <IoIosArrowDown size={10} />}
-                </Link>
-              </li>
-            ))}
+            {menuNavigation?.map((item, index) => {
+              const isActive = item.link === "/" ? pathname === "/" : pathname?.startsWith(item.link);
+              return (
+                <li key={index}>
+                  <Link
+                    className={`flex items-center gap-1.5 transition-colors ${isActive ? "text-[#EBB643] font-bold" : "text-slate-700 hover:text-[#EBB643]"}`}
+                    href={item?.link}
+                  >
+                    {item?.name} {item?.submenu && <IoIosArrowDown size={10} />}
+                  </Link>
+                </li>
+              )
+            })}
           </ul>
         </div>
         <div className="hidden md:flex items-center gap-4">
@@ -106,88 +113,114 @@ const Header = () => {
         </button>
       </div>
       {/* Mobile Menu */}
+      {/* Mobile Menu Backdrop */}
       {isMobileMenuOpen && (
-        <div className="md:hidden absolute top-16 left-0 w-full bg-white border-b border-gray-100 shadow-lg z-50 flex flex-col p-4 space-y-4">
-          <Link
-            href="/hackathon"
-            className="text-slate-700 font-medium"
-            onClick={() => setIsMobileMenuOpen(false)}
-          >
-            Hackathons
-          </Link>
-          <Link
-            href="/bounties"
-            className="text-slate-700 font-medium"
-            onClick={() => setIsMobileMenuOpen(false)}
-          >
-            Bounties
-          </Link>
-          <Link
-            href="/grants"
-            className="text-slate-700 font-medium"
-            onClick={() => setIsMobileMenuOpen(false)}
-          >
-            Grants
-          </Link>
-          <Link
-            href="/jobs"
-            className="text-slate-700 font-medium"
-            onClick={() => setIsMobileMenuOpen(false)}
-          >
-            Jobs
-          </Link>
-          <Link
-            href="/about"
-            className="text-slate-700 font-medium"
-            onClick={() => setIsMobileMenuOpen(false)}
-          >
-            About
-          </Link>
-
-          {user ? (
-            <>
-              <Link
-                href="/profile"
-                className="text-slate-700 font-medium"
-                onClick={() => setIsMobileMenuOpen(false)}
-              >
-                View Profile
-              </Link>
-              <button
-                onClick={() => {
-                  signOut();
-                  setIsMobileMenuOpen(false);
-                  router.push("/");
-                }}
-                className="text-left text-slate-700 font-medium"
-              >
-                Log out
-              </button>
-            </>
-          ) : (
-            <div className="flex flex-col gap-2 pt-2 border-t mt-2">
-              <Link
-                href="/login"
-                className="text-slate-700 font-medium p-2 text-center border rounded-lg"
-                onClick={() => setIsMobileMenuOpen(false)}
-              >
-                Log In
-              </Link>
-              <Link
-                href="/signup"
-                className="text-white bg-black font-medium p-2 text-center rounded-lg"
-                onClick={() => setIsMobileMenuOpen(false)}
-              >
-                Sign Up
-              </Link>
-            </div>
-          )}
-
-          <Button className="bg-[#EBB643] hover:bg-[#d9a532] text-slate-900 font-semibold rounded-full w-full">
-            Connect Wallet
-          </Button>
-        </div>
+        <div
+          className="md:hidden fixed inset-0 bg-black/50 z-40"
+          onClick={() => setIsMobileMenuOpen(false)}
+        />
       )}
+
+      {/* Mobile Menu Sidebar */}
+      <div
+        className={`md:hidden fixed top-0 right-0 w-[75%] sm:w-1/2 h-full bg-white z-50 shadow-2xl transition-transform duration-300 ease-in-out transform ${isMobileMenuOpen ? "translate-x-0" : "translate-x-full"
+          }`}
+      >
+        <div className="flex flex-col h-full bg-white">
+          <div className="flex items-center justify-between p-6 border-b border-gray-100">
+            <span className="text-xl font-bold font-montserrat text-slate-900">Menu</span>
+            <button
+              onClick={() => setIsMobileMenuOpen(false)}
+              className="p-2 -mr-2 text-slate-500 hover:text-slate-900 hover:bg-gray-100 rounded-full transition-colors"
+            >
+              <X size={28} />
+            </button>
+          </div>
+
+          <div className="flex-1 overflow-y-auto py-6 px-6 flex flex-col space-y-6">
+            <Link
+              href="/hackathon"
+              className="text-xl font-medium text-slate-800 hover:text-[#EBB643] transition-colors font-montserrat"
+              onClick={() => setIsMobileMenuOpen(false)}
+            >
+              Hackathons
+            </Link>
+            <Link
+              href="/bounties"
+              className="text-xl font-medium text-slate-800 hover:text-[#EBB643] transition-colors font-montserrat"
+              onClick={() => setIsMobileMenuOpen(false)}
+            >
+              Bounties
+            </Link>
+            <Link
+              href="/grants"
+              className="text-xl font-medium text-slate-800 hover:text-[#EBB643] transition-colors font-montserrat"
+              onClick={() => setIsMobileMenuOpen(false)}
+            >
+              Grants
+            </Link>
+            <Link
+              href="/jobs"
+              className="text-xl font-medium text-slate-800 hover:text-[#EBB643] transition-colors font-montserrat"
+              onClick={() => setIsMobileMenuOpen(false)}
+            >
+              Jobs
+            </Link>
+            <Link
+              href="/about"
+              className="text-xl font-medium text-slate-800 hover:text-[#EBB643] transition-colors font-montserrat"
+              onClick={() => setIsMobileMenuOpen(false)}
+            >
+              About
+            </Link>
+
+            <div className="my-4 border-t border-gray-100 pt-6 space-y-6">
+              {user ? (
+                <>
+                  <Link
+                    href="/profile"
+                    className="flex items-center gap-3 text-lg font-medium text-slate-800 hover:text-[#EBB643] transition-colors font-montserrat"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                  >
+                    <span>View Profile</span>
+                  </Link>
+                  <button
+                    onClick={() => {
+                      signOut();
+                      setIsMobileMenuOpen(false);
+                      router.push("/");
+                    }}
+                    className="text-left text-lg font-medium text-red-500 hover:text-red-600 transition-colors font-montserrat"
+                  >
+                    Log out
+                  </button>
+                </>
+              ) : (
+                <div className="flex flex-col gap-4">
+                  <Link
+                    href="/login"
+                    className="w-full py-3 text-center text-slate-700 font-medium border border-gray-200 rounded-xl hover:bg-gray-50 transition-colors"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                  >
+                    Log In
+                  </Link>
+                  <Link
+                    href="/signup"
+                    className="w-full py-3 text-center text-white bg-black font-medium rounded-xl hover:bg-gray-900 transition-colors shadow-lg"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                  >
+                    Sign Up
+                  </Link>
+                </div>
+              )}
+
+              <Button className="w-full bg-[#EBB643] hover:bg-[#d9a532] text-slate-900 font-bold py-6 rounded-full text-lg shadow-md">
+                Connect Wallet
+              </Button>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   );
 };

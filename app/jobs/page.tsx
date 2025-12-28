@@ -29,10 +29,10 @@ const categories = [
 ];
 
 const featuredCompanies = [
-  { name: "CoinBase", positions: 12, logo: "CB" },
-  { name: "Uniswap Lab", positions: 8, logo: "UL" },
-  { name: "Aave", positions: 5, logo: "Aa" },
-  { name: "Chainlink", positions: 7, logo: "CL" },
+  { name: "CoinBase", positions: 12, logo: "/images/token-branded_coinbase.svg" },
+  { name: "Uniswap Lab", positions: 8, logo: "/images/uni.svg" },
+  { name: "Aave", positions: 5, logo: "/images/01.svg" },
+  { name: "Chainlink", positions: 7, logo: "/icons/chainlinkicon.svg" },
 ];
 
 const trendingSkills = [
@@ -53,6 +53,7 @@ const opportunities = [
     range: "$200k-$280k",
     description: "Remote Senior Level",
     color: "bg-[#1C47A2]",
+    logo: "/images/token-branded_coinbase.svg"
   },
   {
     JobTitle: "Head of Design",
@@ -60,6 +61,7 @@ const opportunities = [
     range: "$160K - $220K",
     description: "San Francisco • Lead Level",
     color: "bg-[#8A38F5]",
+    logo: "/images/uni.svg" // Using Uniswap as an example or placeholder
   },
   {
     JobTitle: "Community Manager",
@@ -67,6 +69,7 @@ const opportunities = [
     range: "$70K - $100K",
     description: "Remote Mid Level",
     color: "bg-[#9B6A00]",
+    logo: "/images/01.svg" // Placeholder
   },
 ];
 
@@ -85,20 +88,26 @@ function JobCard({
   range,
   description,
   color,
+  logo
 }: {
   JobTitle: string;
   title: string;
   range: string;
   description: string;
   color: string;
+  logo?: string;
 }) {
   return (
     <div className="min-h-[239px] bg-[#F7F8FB] justify-around flex flex-col p-4 rounded-lg">
       <div className="flex gap-3 items-center">
         <span
-          className={`${color} p-3 flex items-center justify-center w-12 h-12 rounded-full`}
+          className={`${color || 'bg-blue-500'} p-3 flex items-center justify-center w-12 h-12 rounded-full overflow-hidden shrink-0 ${logo ? 'bg-white border border-gray-100 p-0' : ''}`}
         >
-          <RxRocket color="white" size={24} />
+          {logo ? (
+            <img src={logo} alt={title} className="w-full h-full object-contain p-2" />
+          ) : (
+            <RxRocket color="white" size={24} />
+          )}
         </span>{" "}
         <span>
           <p className="font-semibold font-nunito">{JobTitle}</p>
@@ -144,7 +153,7 @@ export default function JobsPage() {
       created_at: new Date().toISOString(),
       title: "Senior Smart Contract Developer",
       company: "Coinbase",
-      logo_url: "CB",
+      logo_url: "/images/token-branded_coinbase.svg",
       salary_range: "$180K - $250K",
       equity: "+ Equity & Benefits",
       location: "Remote",
@@ -159,7 +168,7 @@ export default function JobsPage() {
       created_at: new Date().toISOString(),
       title: "Senior Product Designer",
       company: "Uniswap Labs",
-      logo_url: "UL",
+      logo_url: "/images/uni.svg",
       salary_range: "$120K - $160K",
       equity: "+ Equity",
       location: "New York, NY",
@@ -359,8 +368,12 @@ export default function JobsPage() {
                     key={company.name}
                     className="flex items-center gap-3 cursor-pointer group"
                   >
-                    <div className="w-10 h-10 rounded-full bg-blue-50 flex items-center justify-center text-blue-600 font-bold text-xs">
-                      {company.logo}
+                    <div className="w-10 h-10 rounded-full  flex items-center justify-center text-blue-600 font-bold text-xs overflow-hidden">
+                      {company.logo.startsWith("/") || company.logo.startsWith("http") ? (
+                        <img src={company.logo} alt={company.name} className="w-full h-full object-contain p-2" />
+                      ) : (
+                        company.logo
+                      )}
                     </div>
                     <div>
                       <h4 className="text-sm font-semibold text-slate-900 group-hover:text-[#EBB643] transition-colors font-montserrat">
@@ -414,11 +427,14 @@ export default function JobsPage() {
                 <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-4 gap-4">
                   <div className="flex items-center gap-4">
                     <div
-                      className={`w-12 h-12 rounded-full flex items-center justify-center font-bold text-lg ${job.color_theme || "bg-blue-100 text-blue-600"}`}
+                      className={`w-12 h-12 rounded-full flex items-center justify-center font-bold text-lg overflow-hidden ${job.logo_url && (job.logo_url.startsWith('http') || job.logo_url.startsWith('/'))
+                        ? "bg-white border border-gray-100"
+                        : (job.color_theme || "bg-blue-100 text-blue-600")
+                        }`}
                     >
                       {/* Check if logo_url is a URL or initials */}
                       {job.logo_url && (job.logo_url.startsWith('http') || job.logo_url.startsWith('/')) ? (
-                        <img src={job.logo_url} alt={job.company} className="w-full h-full object-cover rounded-full" />
+                        <img src={job.logo_url} alt={job.company} className="w-full h-full object-contain p-2" />
                       ) : (
                         job.logo_url || job.company.substring(0, 2).toUpperCase()
                       )}
@@ -527,6 +543,7 @@ export default function JobsPage() {
                 color={opportunity.color}
                 range={opportunity.range}
                 description={opportunity.description}
+                logo={opportunity.logo}
               />
             </motion.div>
           ))}

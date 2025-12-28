@@ -35,7 +35,10 @@ const UpcomingEvent = () => {
             </span>
           </div>
         </div>
-        <Button className="w-full rounded-3xl bg-[#EFEFEF] hover:bg-[#EFEFEF]/50 text-black py-6">
+        <Button
+          onClick={() => window.location.href = '/events'}
+          className="w-full rounded-3xl bg-[#EFEFEF] hover:bg-[#EFEFEF]/50 text-black py-6"
+        >
           View All Events
         </Button>
       </CardDescription>

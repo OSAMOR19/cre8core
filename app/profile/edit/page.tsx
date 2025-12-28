@@ -1,16 +1,83 @@
 "use client";
 
 import Image from "next/image";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import profileData from "../../../public/icons/profileicon.svg";
+import { supabase } from "@/lib/supabase";
+import { useRouter } from "next/navigation";
 
 const Edit = () => {
+  const router = useRouter();
+  const [loading, setLoading] = useState(false);
+  const [user, setUser] = useState<any>(null); // Supabase user
+
+  // Form State
+  const [formData, setFormData] = useState({
+    avatarUrl: "",
+    name: "",
+    username: "",
+    location: "",
+    bio: "",
+    website: "",
+  });
+
   const [skill, setSkill] = useState<string>("");
-  const [skills, setSkills] = useState<string[]>([
-    "javascript",
-    "react",
-    "nextjs",
-  ]);
+  const [skills, setSkills] = useState<string[]>([]);
+
+  useEffect(() => {
+    const fetchProfile = async () => {
+      try {
+        setLoading(true);
+        const { data: { user } } = await supabase.auth.getUser();
+
+        if (!user) {
+          router.push("/login"); // Redirect if not logged in
+          return;
+        }
+
+        setUser(user);
+
+        // Try to fetch profile from 'profiles' table
+        const { data: profile, error } = await supabase
+          .from("profiles")
+          .select("*")
+          .eq("id", user.id)
+          .single();
+
+        if (profile) {
+          setFormData({
+            avatarUrl: profile.avatar_url || "",
+            name: profile.full_name || "",
+            username: profile.username || "",
+            location: profile.location || "",
+            bio: profile.bio || "",
+            website: profile.website || "",
+          });
+          setSkills(profile.skills || []);
+        } else {
+          // Fallback to auth metadata if profile doesn't exist yet
+          setFormData({
+            avatarUrl: user.user_metadata?.avatar_url || "",
+            name: user.user_metadata?.full_name || "",
+            username: user.user_metadata?.username || "",
+            location: user.user_metadata?.location || "",
+            bio: "",
+            website: "",
+          });
+        }
+      } catch (error) {
+        console.error("Error fetching profile:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProfile();
+  }, [router]);
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    setFormData({ ...formData, [e.target.id]: e.target.value });
+  };
 
   const handleAddSkill = (e: any) => {
     e.preventDefault();
@@ -23,131 +90,190 @@ const Edit = () => {
   const removeSkill = (item: string): void => {
     setSkills(skills.filter((s) => s !== item));
   };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!user) return;
+
+    try {
+      setLoading(true);
+
+      const { error } = await supabase
+        .from("profiles")
+        .upsert({
+          id: user.id,
+          full_name: formData.name,
+          username: formData.username,
+          avatar_url: formData.avatarUrl,
+          website: formData.website,
+          location: formData.location,
+          bio: formData.bio,
+          skills: skills,
+          updated_at: new Date().toISOString(),
+        });
+
+      if (error) throw error;
+
+      router.push("/profile");
+
+    } catch (error) {
+      console.error("Error updating profile:", error);
+      alert("Error updating profile");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
-    <div className="bg-white px-10 py-8 max-w-[90%] my-10 rounded-2xl mx-auto">
+    <div className="bg-white px-4 md:px-10 py-8 max-w-[95%] md:max-w-[70%] mt-20 md:mt-10 rounded-2xl mx-auto mb-10 shadow-sm border border-gray-100">
       <div className="flex flex-col items-center space-y-6 text-center">
         <div>
-          <h1 className="text-[48px]">Edit Profile</h1>
-          <p className="text-[#666666] text-sm font-montserrat">
+          <h1 className="text-3xl md:text-[48px] font-semibold text-slate-900">Edit Profile</h1>
+          <p className="text-[#666666] text-sm font-montserrat mt-2">
             Update your profile information and showcase your skills
           </p>
         </div>
-        <div className="w-48 h-48 bg-linear-to-br font-roboto from-purple-500 to-pink-500 rounded-full flex items-center justify-center overflow-hidden">
-          <Image
-            src={profileData}
-            alt={profileData}
-            width={128}
-            height={128}
-            className="w-full h-full object-cover"
-          />
+        <div className="w-32 h-32 md:w-48 md:h-48 bg-linear-to-br font-roboto from-purple-500 to-pink-500 rounded-full flex items-center justify-center overflow-hidden">
+          {formData.avatarUrl ? (
+            <img
+              src={formData.avatarUrl}
+              alt="Profile"
+              className="w-full h-full object-cover"
+              onError={(e) => {
+                // Fallback if image fails to load
+                (e.target as HTMLImageElement).src = profileData.src;
+              }}
+            />
+          ) : (
+            <Image
+              src={profileData}
+              alt="Default Profile"
+              width={128}
+              height={128}
+              className="w-full h-full object-cover"
+            />
+          )}
         </div>
       </div>
       <div>
-        <form action="">
-          <div className="flex flex-col space-y-6 mt-10 ">
-            <div className="w-full flex gap-4">
+        <form onSubmit={handleSubmit}>
+          <div className="flex flex-col space-y-6 mt-10">
+            <div className="w-full flex flex-col md:flex-row gap-4">
               <div className="w-full flex flex-col space-y-2">
-                <label htmlFor="avatarUrl" className=" font-medium">
+                <label htmlFor="avatarUrl" className="font-medium text-slate-700">
                   Avatar URL
                 </label>
                 <input
                   type="text"
                   id="avatarUrl"
-                  className="border border-gray-300 rounded-md p-2 "
+                  value={formData.avatarUrl}
+                  onChange={handleChange}
+                  className="border border-gray-300 rounded-xl p-3 focus:outline-none focus:border-[#E4B95C]"
                   placeholder="https://example.com/avatar.jpg"
                 />
               </div>
               <div className="w-full flex flex-col space-y-2">
-                <label htmlFor="name" className=" font-medium">
+                <label htmlFor="name" className="font-medium text-slate-700">
                   Full Name
                 </label>
                 <input
                   type="text"
                   id="name"
-                  className="border border-gray-300 rounded-md p-2 font-montserrat"
+                  value={formData.name}
+                  onChange={handleChange}
+                  className="border border-gray-300 rounded-xl p-3 font-montserrat focus:outline-none focus:border-[#E4B95C]"
                   placeholder="Enter your full name"
                 />
               </div>
             </div>
-            <div className="w-full flex gap-4">
+            <div className="w-full flex flex-col md:flex-row gap-4">
               <div className="w-full flex flex-col space-y-2">
-                <label htmlFor="avatarUrl" className=" font-medium">
+                <label htmlFor="username" className="font-medium text-slate-700">
                   Username
                 </label>
                 <input
                   type="text"
                   id="username"
-                  className="border border-gray-300 rounded-md p-2 "
+                  value={formData.username}
+                  onChange={handleChange}
+                  className="border border-gray-300 rounded-xl p-3 focus:outline-none focus:border-[#E4B95C]"
                   placeholder="@alexdev"
                 />
               </div>
               <div className="w-full flex flex-col space-y-2">
-                <label htmlFor="name" className=" font-medium">
+                <label htmlFor="location" className="font-medium text-slate-700">
                   Location
                 </label>
                 <input
                   type="text"
                   id="location"
-                  className="border border-gray-300 rounded-md p-2 "
+                  value={formData.location}
+                  onChange={handleChange}
+                  className="border border-gray-300 rounded-xl p-3 focus:outline-none focus:border-[#E4B95C]"
                   placeholder="San Francisco, CA"
                 />
               </div>
             </div>
             <div className="flex flex-col space-y-2">
-              <label htmlFor="bio" className=" font-medium">
+              <label htmlFor="bio" className="font-medium text-slate-700">
                 Bio
               </label>
               <textarea
                 id="bio"
-                rows={10}
-                className="border border-gray-300 rounded-md p-2 "
+                rows={6}
+                value={formData.bio}
+                onChange={handleChange}
+                className="border border-gray-300 rounded-xl p-3 focus:outline-none focus:border-[#E4B95C]"
                 placeholder="Full-stack developer passionate about Web3 and DeFi. Building the future on Base blockchain."
               ></textarea>
             </div>
             <div className="flex flex-col space-y-2">
-              <label htmlFor="skills" className=" font-medium">
+              <label htmlFor="website" className="font-medium text-slate-700">
                 Website
               </label>
               <input
                 type="text"
-                id="skills"
-                className="border border-gray-300 rounded-md p-2 "
+                id="website"
+                value={formData.website}
+                onChange={handleChange}
+                className="border border-gray-300 rounded-xl p-3 focus:outline-none focus:border-[#E4B95C]"
                 placeholder="https://alexdev.XYZ"
               />
             </div>
             <div className="w-full">
-              <label className="block mb-2 font-medium">Skills</label>
+              <label className="block mb-2 font-medium text-slate-700">Skills</label>
 
               {/* Input Row */}
-              <div className="flex items-center gap-3 border rounded-lg p-3">
+              <div className="flex items-center gap-3 border border-gray-300 rounded-xl p-2 transition-colors focus-within:border-[#E4B95C]">
                 <input
                   type="text"
                   placeholder="Add a skill"
                   value={skill}
                   onChange={(e) => setSkill(e.target.value)}
-                  className="flex-1 outline-none"
+                  className="flex-1 outline-none px-2"
                 />
 
                 <button
                   onClick={(e) => handleAddSkill(e)}
-                  className="bg-[#E4B95C] text-black text-sm px-14 py-3 rounded-full hover:opacity-80"
+                  type="button"
+                  className="bg-[#E4B95C] text-slate-900 font-medium text-sm px-6 py-2 md:px-10 md:py-2 rounded-full hover:bg-[#d9a532] transition-colors"
                 >
                   Add
                 </button>
               </div>
 
               {/* Tags */}
-              <div className="flex flex-wrap gap-3 mt-4">
+              <div className="flex flex-wrap gap-2 mt-4">
                 {skills.map((item, index) => (
                   <div
                     key={index}
-                    className="flex items-center gap-2 bg-gray-100 rounded-full px-4 py-2 text-sm"
+                    className="flex items-center gap-2 bg-gray-100 rounded-full px-4 py-1.5 text-sm"
                   >
                     {item}
                     <button
                       type="button"
                       onClick={() => removeSkill(item)}
-                      className="font-bold text-gray-500 hover:text-gray-800"
+                      className="font-bold text-gray-500 hover:text-red-500 ml-1"
                     >
                       ×
                     </button>
@@ -155,16 +281,18 @@ const Edit = () => {
                 ))}
               </div>
             </div>
-            <div className="w-full flex items-center gap-4">
+            <div className="w-full flex flex-col md:flex-row items-center gap-4 pt-4">
               <button
                 type="submit"
-                className="bg-[#E4B95C] text-black py-3  rounded-3xl text-sm hover:bg-[#E4B95C]/50 flex-1"
+                disabled={loading}
+                className="w-full bg-[#E4B95C] text-slate-900 font-medium py-3.5 rounded-full text-sm hover:bg-[#d9a532] transition-colors disabled:opacity-50"
               >
-                Save Changes
+                {loading ? "Saving..." : "Save Changes"}
               </button>
               <button
-                className="w-[300px] border py-3 rounded-3xl border-[#E4B95C] text-sm text-black hover:bg-[#E4B95C]/10 "
+                className="w-full md:w-[200px] border border-gray-300 py-3.5 rounded-full text-sm text-slate-700 font-medium hover:bg-gray-50 transition-colors"
                 type="button"
+                onClick={() => router.back()}
               >
                 Cancel
               </button>
