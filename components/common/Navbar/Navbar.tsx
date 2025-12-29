@@ -40,6 +40,81 @@ const Navbar = () => {
     router.push("/login");
   };
 
+
+  /* Custom Connect Button Component to reuse */
+  const CustomConnectButton = ({ className = "" }: { className?: string }) => {
+    return (
+      <ConnectButton.Custom>
+        {({
+          account,
+          chain,
+          openAccountModal,
+          openChainModal,
+          openConnectModal,
+          authenticationStatus,
+          mounted,
+        }) => {
+          const ready = mounted && authenticationStatus !== 'loading';
+          const connected =
+            ready &&
+            account &&
+            chain &&
+            (!authenticationStatus ||
+              authenticationStatus === 'authenticated');
+
+          return (
+            <div
+              {...(!ready && {
+                'aria-hidden': true,
+                'style': {
+                  opacity: 0,
+                  pointerEvents: 'none',
+                  userSelect: 'none',
+                },
+              })}
+              className={className}
+            >
+              {(() => {
+                if (!connected) {
+                  return (
+                    <Button
+                      onClick={openConnectModal}
+                      className="bg-[#EBB643] hover:bg-[#d9a532] text-slate-900 font-normal font-montserrat rounded-full px-6 w-full md:w-auto"
+                    >
+                      Connect Wallet
+                    </Button>
+                  );
+                }
+
+                if (chain.unsupported) {
+                  return (
+                    <Button onClick={openChainModal} variant="destructive" className="rounded-full">
+                      Wrong network
+                    </Button>
+                  );
+                }
+
+                return (
+                  <div style={{ display: 'flex', gap: 12 }}>
+                    <Button
+                      onClick={openAccountModal}
+                      className="bg-[#EBB643] hover:bg-[#d9a532] text-slate-900 font-normal font-montserrat rounded-full px-6"
+                    >
+                      {account.displayName}
+                      {account.displayBalance
+                        ? ` (${account.displayBalance})`
+                        : ''}
+                    </Button>
+                  </div>
+                );
+              })()}
+            </div>
+          );
+        }}
+      </ConnectButton.Custom>
+    );
+  };
+
   return (
     <nav className="bg-white border-b border-gray-100 py-2">
       <div className="container mx-auto px-4 flex items-center justify-between">
@@ -126,7 +201,7 @@ const Navbar = () => {
           </div>
 
           {/* Connect Wallet Button */}
-          <ConnectButton />
+          <CustomConnectButton />
         </div>
 
         {/* Mobile Menu Button */}
@@ -177,7 +252,7 @@ const Navbar = () => {
             About
           </Link>
           <div className="w-full">
-            <ConnectButton />
+            <CustomConnectButton className="w-full" />
           </div>
         </div>
       )}

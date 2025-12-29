@@ -8,6 +8,7 @@ import { useState, useEffect } from "react";
 import { IoIosArrowDown } from "react-icons/io";
 import Logo from "../../../public/images/logo.png";
 import Image from "next/image";
+import { ConnectButton } from "@rainbow-me/rainbowkit";
 import { supabase } from "@/lib/supabase";
 
 const Header = () => {
@@ -46,6 +47,81 @@ const Header = () => {
     { name: "Jobs", link: "/jobs" },
     { name: "About", link: "/about" },
   ];
+
+  /* Custom Connect Button Component to reuse */
+  const CustomConnectButton = ({ className = "" }: { className?: string }) => {
+    return (
+      <ConnectButton.Custom>
+        {({
+          account,
+          chain,
+          openAccountModal,
+          openChainModal,
+          openConnectModal,
+          authenticationStatus,
+          mounted,
+        }) => {
+          const ready = mounted && authenticationStatus !== 'loading';
+          const connected =
+            ready &&
+            account &&
+            chain &&
+            (!authenticationStatus ||
+              authenticationStatus === 'authenticated');
+
+          return (
+            <div
+              {...(!ready && {
+                'aria-hidden': true,
+                'style': {
+                  opacity: 0,
+                  pointerEvents: 'none',
+                  userSelect: 'none',
+                },
+              })}
+              className={className}
+            >
+              {(() => {
+                if (!connected) {
+                  return (
+                    <Button
+                      onClick={openConnectModal}
+                      className="bg-[#EBB643] hover:bg-[#d9a532] text-slate-900 font-normal font-montserrat rounded-full px-6 w-full md:w-auto"
+                    >
+                      Connect Wallet
+                    </Button>
+                  );
+                }
+
+                if (chain.unsupported) {
+                  return (
+                    <Button onClick={openChainModal} variant="destructive" className="rounded-full">
+                      Wrong network
+                    </Button>
+                  );
+                }
+
+                return (
+                  <div style={{ display: 'flex', gap: 12 }}>
+                    <Button
+                      onClick={openAccountModal}
+                      className="bg-[#EBB643] hover:bg-[#d9a532] text-slate-900 font-normal font-montserrat rounded-full px-6"
+                    >
+                      {account.displayName}
+                      {account.displayBalance
+                        ? ` (${account.displayBalance})`
+                        : ''}
+                    </Button>
+                  </div>
+                );
+              })()}
+            </div>
+          );
+        }}
+      </ConnectButton.Custom>
+    );
+  };
+
   return (
     <div className="fixed h-20 top-0 w-full z-40 py-4 font-montserrat bg-white flex items-start md:items-center justify-between px-4 md:px-8 lg:px-20">
       <div className="flex items-center justify-between w-full ">
@@ -124,9 +200,7 @@ const Header = () => {
               </Link>
             </div>
           )}
-          <Button className="bg-[#EBB643] hover:bg-[#d9a532] text-slate-900 font-normal font-montserrat rounded-full px-6">
-            Connect Wallet
-          </Button>
+          <CustomConnectButton />
         </div>
         {/* Mobile Menu Button */}
         <button
@@ -238,9 +312,9 @@ const Header = () => {
                 </div>
               )}
 
-              <Button className="w-full bg-[#EBB643] hover:bg-[#d9a532] text-slate-900 font-bold py-6 rounded-full text-lg shadow-md">
-                Connect Wallet
-              </Button>
+              <div className="w-full mt-4">
+                <CustomConnectButton className="w-full" />
+              </div>
             </div>
           </div>
         </div>

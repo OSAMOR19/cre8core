@@ -2,7 +2,7 @@
 
 import React from "react";
 import "@rainbow-me/rainbowkit/styles.css";
-import { getDefaultConfig, RainbowKitProvider } from "@rainbow-me/rainbowkit";
+import { getDefaultConfig, RainbowKitProvider, lightTheme } from "@rainbow-me/rainbowkit";
 import { WagmiProvider } from "wagmi";
 import { base, baseSepolia, mainnet } from "wagmi/chains";
 import { QueryClientProvider, QueryClient } from "@tanstack/react-query";
@@ -22,7 +22,17 @@ export default function Providers({ children }: { children: React.ReactNode }) {
     return (
         <WagmiProvider config={config}>
             <QueryClientProvider client={queryClient}>
-                <RainbowKitProvider>{mounted && children}</RainbowKitProvider>
+                <RainbowKitProvider
+                    theme={lightTheme({
+                        accentColor: '#EBB643',
+                        accentColorForeground: 'black',
+                        borderRadius: 'large',
+                        fontStack: 'system',
+                        overlayBlur: 'small',
+                    })}
+                >
+                    {mounted && children}
+                </RainbowKitProvider>
             </QueryClientProvider>
         </WagmiProvider>
     );
