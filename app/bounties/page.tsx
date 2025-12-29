@@ -11,6 +11,7 @@ import { PiMagnifyingGlassLight } from "react-icons/pi";
 import { motion } from "framer-motion";
 import { supabase } from "@/lib/supabase";
 import { Bounty } from "@/lib/types";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export default function BountiesPage() {
   const router = useRouter();
@@ -71,33 +72,35 @@ export default function BountiesPage() {
   ];
 
   useEffect(() => {
+    let mounted = true;
+
     const fetchBounties = async () => {
       try {
         const { data, error } = await supabase
           .from("bounties")
           .select("*")
-          .order("created_at", { ascending: false }); // Show newest first
+          .order("created_at", { ascending: false });
 
-        if (error) {
-          console.error("Error fetching bounties:", error);
-          // If error (e.g. table not found), fallback to mock data
-          setBountiesList(fallbackBounties);
-        } else {
-          // Whether empty or not, if success, use the data
-          // If empty, it will just show "No bounties found" which is correct behavior for a new app
-          setBountiesList(data || []);
+        if (mounted) {
+          if (error) {
+            console.error("Error fetching bounties:", error);
+            setBountiesList(fallbackBounties);
+          } else {
+            setBountiesList(data || []);
+          }
+          setLoading(false);
         }
       } catch (err) {
         console.error("Unexpected error:", err);
-        setBountiesList(fallbackBounties);
-      } finally {
-        setLoading(false);
+        if (mounted) {
+          setBountiesList(fallbackBounties);
+          setLoading(false);
+        }
       }
     };
 
     fetchBounties();
 
-    // Realtime subscription
     const channel = supabase
       .channel("bounties-realtime")
       .on(
@@ -120,6 +123,7 @@ export default function BountiesPage() {
       .subscribe();
 
     return () => {
+      mounted = false;
       supabase.removeChannel(channel);
     };
   }, []);
@@ -219,7 +223,35 @@ export default function BountiesPage() {
     }
 
     if (loading) {
-      return <div className="text-center py-10 font-montserrat">Loading bounties...</div>;
+      return (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-4">
+          {[1, 2, 3, 4, 5, 6].map(i => (
+            <div key={i} className="bg-white rounded-lg border shadow-sm h-full flex flex-col">
+              <div className="flex items-center justify-center border-b py-6">
+                <Skeleton className="h-[100px] w-[150px] rounded-md" />
+              </div>
+              <div className="p-4 flex flex-col gap-4 flex-grow">
+                <div className="flex justify-between items-center">
+                  <Skeleton className="h-6 w-20" />
+                  <Skeleton className="h-6 w-24 rounded-full" />
+                </div>
+                <Skeleton className="h-7 w-3/4" />
+                <Skeleton className="h-16 w-full" />
+
+                <div className="p-5 border rounded-2xl my-2 space-y-3">
+                  <Skeleton className="h-6 w-40" />
+                  <Skeleton className="h-6 w-32" />
+                </div>
+
+                <div className="mt-auto space-y-4">
+                  <Skeleton className="h-6 w-48" />
+                  <Skeleton className="h-12 w-full rounded-full" />
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      );
     }
 
     if (filteredBounties.length === 0) {
@@ -298,15 +330,15 @@ export default function BountiesPage() {
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.5 }}
-        className="flex gap-4 overflow-x-auto pb-4 md:flex-wrap md:overflow-visible no-scrollbar"
+        className="flex gap-4 flex-wrap pb-4 md:overflow-visible"
       >
         {["All", "Video", "Meme", "Threads", "Sprints"].map((category) => (
           <button
             key={category}
             onClick={() => setTab(category)}
             className={`px-6 py-2 md:px-10 md:py-2.5 whitespace-nowrap border border-[#E4B95C] text-black rounded-full font-medium transition-all duration-300 ${tab === category
-                ? "bg-[#E4B95C] text-slate-900 transform scale-105 shadow-md"
-                : "hover:bg-[#E4B95C]/10 bg-white"
+              ? "bg-[#E4B95C] text-slate-900 transform scale-105 shadow-md"
+              : "hover:bg-[#E4B95C]/10 bg-white"
               }`}
           >
             {category}

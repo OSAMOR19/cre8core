@@ -2,6 +2,7 @@ import "./globals.css";
 import { ClientLayout } from "@/components/Layout/ClientLayout";
 import { Metadata } from "next";
 import { montserrat, roboto, nunito } from "./font";
+import Providers from "@/components/Providers";
 
 export const metadata: Metadata = {
   title: {
@@ -32,7 +33,9 @@ export default function RootLayout({
       <body
         className={`${montserrat.variable} ${roboto.variable} ${nunito.variable} bg-[#F8F8F8]`}
       >
-        <ClientLayout>{children}</ClientLayout>
+        <Providers>
+          <ClientLayout>{children}</ClientLayout>
+        </Providers>
       </body>
     </html>
   );

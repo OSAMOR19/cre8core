@@ -11,6 +11,7 @@ import {
   Star,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 import { Profile, Bounty, BountySubmission } from "@/lib/types";
@@ -147,7 +148,50 @@ const ProfilePage = () => {
   };
 
   if (loading) {
-    return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
+    return (
+      <div className="min-h-screen bg-gray-50 py-8 pt-24">
+        <div className="container mx-auto px-4 max-w-6xl">
+          {/* Header Skeleton */}
+          <div className="bg-white rounded-2xl p-6 md:p-8 mb-6 shadow-sm flex flex-col md:flex-row gap-6 items-center md:items-start">
+            <Skeleton className="w-24 h-24 md:w-32 md:h-32 rounded-full shrink-0" />
+            <div className="flex-1 space-y-4 w-full">
+              <div className="flex flex-col md:flex-row justify-between items-start gap-4">
+                <div className="space-y-2 w-full">
+                  <Skeleton className="h-8 w-48 mx-auto md:mx-0" />
+                  <Skeleton className="h-4 w-32 mx-auto md:mx-0" />
+                </div>
+                <Skeleton className="h-10 w-full md:w-32 rounded-full" />
+              </div>
+              <Skeleton className="h-16 w-full max-w-2xl mx-auto md:mx-0" />
+              <div className="flex gap-4 justify-center md:justify-start">
+                <Skeleton className="h-4 w-24" />
+                <Skeleton className="h-4 w-24" />
+              </div>
+            </div>
+          </div>
+
+          {/* Stats Skeleton */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+            {[1, 2, 3, 4].map(i => (
+              <Skeleton key={i} className="h-32 w-full rounded-xl" />
+            ))}
+          </div>
+
+          {/* Tabs Skeleton */}
+          <div className="flex gap-4 mb-6">
+            <Skeleton className="h-10 w-32 rounded-full" />
+            <Skeleton className="h-10 w-32 rounded-full" />
+          </div>
+
+          {/* List Skeleton */}
+          <div className="space-y-4">
+            {[1, 2, 3].map(i => (
+              <Skeleton key={i} className="h-40 w-full rounded-xl" />
+            ))}
+          </div>
+        </div>
+      </div>
+    );
   }
 
   if (!profile) return null;

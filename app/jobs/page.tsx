@@ -17,6 +17,7 @@ import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { supabase } from "@/lib/supabase";
 import { Job } from "@/lib/types";
+import { Skeleton } from "@/components/ui/skeleton";
 
 // Mock Data
 const categories = [
@@ -416,7 +417,41 @@ export default function JobsPage() {
             className="lg:col-span-3 space-y-4"
           >
             {loading ? (
-              <div className="text-center py-10 font-montserrat text-gray-500">Loading jobs...</div>
+              <div className="space-y-4">
+                {[1, 2, 3].map((i) => (
+                  <div key={i} className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+                    <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-4 gap-4">
+                      <div className="flex items-center gap-4 w-full">
+                        <Skeleton className="w-12 h-12 rounded-full flex-shrink-0" />
+                        <div className="space-y-2 w-full max-w-[200px]">
+                          <Skeleton className="h-6 w-full" />
+                          <Skeleton className="h-4 w-3/4" />
+                        </div>
+                      </div>
+                      <div className="text-right w-full md:w-auto flex flex-col items-end gap-2">
+                        <Skeleton className="h-6 w-32" />
+                        <Skeleton className="h-4 w-20" />
+                      </div>
+                    </div>
+                    <div className="space-y-2 mb-6">
+                      <Skeleton className="h-4 w-full" />
+                      <Skeleton className="h-4 w-5/6" />
+                    </div>
+                    <div className="flex gap-2 mb-6">
+                      <Skeleton className="h-8 w-20 rounded-lg" />
+                      <Skeleton className="h-8 w-20 rounded-lg" />
+                      <Skeleton className="h-8 w-20 rounded-lg" />
+                    </div>
+                    <div className="flex justify-between items-center pt-4 border-t border-gray-100">
+                      <div className="flex gap-4">
+                        <Skeleton className="h-4 w-24" />
+                        <Skeleton className="h-4 w-24" />
+                      </div>
+                      <Skeleton className="h-10 w-32 rounded-full" />
+                    </div>
+                  </div>
+                ))}
+              </div>
             ) : jobsList.map((job) => (
               <motion.div
                 variants={fadeInUp}
@@ -428,9 +463,9 @@ export default function JobsPage() {
                   <div className="flex items-center gap-4">
                     <div
                       className={`w-12 h-12 rounded-full flex items-center justify-center font-bold text-lg overflow-hidden ${(job.logo_url && (job.logo_url.startsWith('http') || job.logo_url.startsWith('/'))) ||
-                          (job.company && ["Coinbase", "Uniswap Labs", "Aave", "Chainlink", "BaseFi Protocol"].some(c => job.company.includes(c)))
-                          ? ""
-                          : (job.color_theme || "bg-blue-100 text-blue-600")
+                        (job.company && ["Coinbase", "Uniswap Labs", "Aave", "Chainlink", "BaseFi Protocol"].some(c => job.company.includes(c)))
+                        ? ""
+                        : (job.color_theme || "bg-blue-100 text-blue-600")
                         }`}
                     >
                       {(() => {

@@ -27,6 +27,26 @@ const bountyDTO = [
       "Design a humorous and engaging meme to promote our upcoming crypto campaign. The meme should resonate with the crypto community and encourage sharing on social media platforms.",
     bounty: "Meme",
   },
+  {
+    img: "/images/bounty.svg",
+    category: "Sprints",
+    date: "Dec 10, 2025",
+    amount: "1500 USDC",
+    location: "Remote",
+    title: "Integrate Base Wallet SDK",
+    description: "Implement the new Base Wallet SDK into an existing dApp to improve user onboarding experience. Must support mobile and desktop connections.",
+    bounty: "Development",
+  },
+  {
+    img: "/images/bounty.svg",
+    category: "Bounty",
+    date: "Dec 15, 2025",
+    amount: "300 USDC",
+    location: "Remote",
+    title: "Translate Key Docs to Spanish",
+    description: "Translate our core developer documentation and 'Get Started' guides into Spanish to help grow our Latin American developer community.",
+    bounty: "Writing",
+  },
 ];
 
 const BrowseBounties = () => {
@@ -62,7 +82,7 @@ const BrowseBounties = () => {
           <BsFunnel />
         </span>
       </div>
-      <div className="flex gap-2 overflow-x-auto md:flex-wrap md:overflow-visible pb-4 md:pb-0 no-scrollbar">
+      <div className="flex gap-2 flex-wrap pb-4 md:pb-0">
         <button
           onClick={() => setTab("All")}
           className={`px-6 py-2 md:px-10 md:py-2.5 whitespace-nowrap border border-[#E4B95C] text-black rounded-full transition-all ${tab === "All" ? "bg-[#E4B95C] text-white" : "bg-white hover:bg-[#E4B95C]/10"

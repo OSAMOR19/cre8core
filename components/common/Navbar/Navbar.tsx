@@ -7,10 +7,38 @@ import Logo from "../../../public/images/logo.png"; // Adjust path if needed
 import { ChevronDown, Menu, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import profile from "../../../public/icons/profileicon.svg";
+import { ConnectButton } from "@rainbow-me/rainbowkit";
+import { supabase } from "@/lib/supabase";
+import { useRouter } from "next/navigation";
 
 const Navbar = () => {
+  const router = useRouter();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false);
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
+
+  React.useEffect(() => {
+    const fetchProfile = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        const { data: profile } = await supabase
+          .from("profiles")
+          .select("avatar_url")
+          .eq("id", user.id)
+          .single();
+
+        if (profile?.avatar_url) {
+          setAvatarUrl(profile.avatar_url);
+        }
+      }
+    };
+    fetchProfile();
+  }, []);
+
+  const handleSignOut = async () => {
+    await supabase.auth.signOut();
+    router.push("/login");
+  };
 
   return (
     <nav className="bg-white border-b border-gray-100 py-2">
@@ -65,11 +93,11 @@ const Navbar = () => {
               className="flex items-center gap-2 hover:opacity-80 transition-opacity"
             >
               <Image
-                src={profile}
+                src={avatarUrl || profile}
                 alt="Profile"
                 width={32}
                 height={32}
-                className="rounded-full"
+                className="rounded-full w-8 h-8 object-cover"
               />
               <ChevronDown size={16} className="text-slate-700" />
             </button>
@@ -87,7 +115,7 @@ const Navbar = () => {
                 <button
                   onClick={() => {
                     setIsProfileDropdownOpen(false);
-                    // Add logout logic here
+                    handleSignOut();
                   }}
                   className="w-full text-left px-4 py-2 text-slate-700 hover:bg-gray-50 transition-colors font-montserrat"
                 >
@@ -98,9 +126,7 @@ const Navbar = () => {
           </div>
 
           {/* Connect Wallet Button */}
-          <Button className="bg-[#EBB643] hover:bg-[#d9a532] text-slate-900 font-normal font-montserrat rounded-full px-6">
-            Connect Wallet
-          </Button>
+          <ConnectButton />
         </div>
 
         {/* Mobile Menu Button */}
@@ -150,9 +176,9 @@ const Navbar = () => {
           >
             About
           </Link>
-          <Button className="bg-[#EBB643] hover:bg-[#d9a532] text-slate-900 font-semibold rounded-full w-full">
-            Connect Wallet
-          </Button>
+          <div className="w-full">
+            <ConnectButton />
+          </div>
         </div>
       )}
     </nav>

@@ -5,6 +5,7 @@ import React, { useState, useEffect } from "react";
 import profileData from "../../../public/icons/profileicon.svg";
 import { supabase } from "@/lib/supabase";
 import { useRouter } from "next/navigation";
+import StatusModal from "@/components/common/StatusModal";
 
 const Edit = () => {
   const router = useRouter();
@@ -91,6 +92,25 @@ const Edit = () => {
     setSkills(skills.filter((s) => s !== item));
   };
 
+  const [modalState, setModalState] = useState<{
+    isOpen: boolean;
+    type: "success" | "error";
+    title: string;
+    message: string;
+  }>({
+    isOpen: false,
+    type: "success",
+    title: "",
+    message: "",
+  });
+
+  const closeModal = () => {
+    setModalState((prev) => ({ ...prev, isOpen: false }));
+    if (modalState.type === "success") {
+      router.push("/profile");
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!user) return;
@@ -114,13 +134,61 @@ const Edit = () => {
 
       if (error) throw error;
 
-      router.push("/profile");
+      setModalState({
+        isOpen: true,
+        type: "success",
+        title: "Profile Updated!",
+        message: "Your profile information has been successfully updated.",
+      });
 
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error updating profile:", error);
-      alert("Error updating profile");
+      setModalState({
+        isOpen: true,
+        type: "error",
+        title: "Update Failed",
+        message: error.message || "Something went wrong while updating your profile.",
+      });
     } finally {
       setLoading(false);
+    }
+  };
+
+  const [uploading, setUploading] = useState(false);
+
+  const uploadAvatar = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    try {
+      setUploading(true);
+
+      if (!event.target.files || event.target.files.length === 0) {
+        throw new Error('You must select an image to upload.');
+      }
+
+      if (!user) {
+        throw new Error('User not authenticated.');
+      }
+
+      const file = event.target.files[0];
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${user.id}-${Math.random()}.${fileExt}`;
+      const filePath = `${fileName}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from('avatars')
+        .upload(filePath, file);
+
+      if (uploadError) {
+        throw uploadError;
+      }
+
+      const { data } = supabase.storage.from('avatars').getPublicUrl(filePath);
+
+      setFormData({ ...formData, avatarUrl: data.publicUrl });
+
+    } catch (error: any) {
+      alert(error.message);
+    } finally {
+      setUploading(false);
     }
   };
 
@@ -133,26 +201,49 @@ const Edit = () => {
             Update your profile information and showcase your skills
           </p>
         </div>
-        <div className="w-32 h-32 md:w-48 md:h-48 bg-linear-to-br font-roboto from-purple-500 to-pink-500 rounded-full flex items-center justify-center overflow-hidden">
-          {formData.avatarUrl ? (
-            <img
-              src={formData.avatarUrl}
-              alt="Profile"
-              className="w-full h-full object-cover"
-              onError={(e) => {
-                // Fallback if image fails to load
-                (e.target as HTMLImageElement).src = profileData.src;
-              }}
-            />
-          ) : (
-            <Image
-              src={profileData}
-              alt="Default Profile"
-              width={128}
-              height={128}
-              className="w-full h-full object-cover"
-            />
-          )}
+
+        <div className="relative group cursor-pointer">
+          <div className="w-32 h-32 md:w-48 md:h-48 bg-linear-to-br font-roboto from-purple-500 to-pink-500 rounded-full flex items-center justify-center overflow-hidden relative">
+            {formData.avatarUrl ? (
+              <img
+                src={formData.avatarUrl}
+                alt="Profile"
+                className="w-full h-full object-cover"
+                onError={(e) => {
+                  (e.target as HTMLImageElement).src = profileData.src;
+                }}
+              />
+            ) : (
+              <Image
+                src={profileData}
+                alt="Default Profile"
+                width={128}
+                height={128}
+                className="w-full h-full object-cover"
+              />
+            )}
+
+            {/* Loading Overlay */}
+            {uploading && (
+              <div className="absolute inset-0 bg-black/50 flex items-center justify-center z-10">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white"></div>
+              </div>
+            )}
+
+            {/* Hover Overlay */}
+            <div className="absolute inset-0 bg-black/30 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity z-0">
+              <span className="text-white text-sm font-medium">Change Photo</span>
+            </div>
+          </div>
+
+          <input
+            type="file"
+            id="avatar-upload"
+            accept="image/*"
+            onChange={uploadAvatar}
+            className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-20"
+            disabled={uploading}
+          />
         </div>
       </div>
       <div>
@@ -300,6 +391,13 @@ const Edit = () => {
           </div>
         </form>
       </div>
+      <StatusModal
+        isOpen={modalState.isOpen}
+        type={modalState.type}
+        title={modalState.title}
+        message={modalState.message}
+        onClose={closeModal}
+      />
     </div>
   );
 };

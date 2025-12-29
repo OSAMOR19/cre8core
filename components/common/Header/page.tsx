@@ -4,10 +4,11 @@ import { Button } from "@/components/ui/button";
 import { Menu, X } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { IoIosArrowDown } from "react-icons/io";
 import Logo from "../../../public/images/logo.png";
 import Image from "next/image";
+import { supabase } from "@/lib/supabase";
 
 const Header = () => {
   const router = useRouter();
@@ -15,6 +16,28 @@ const Header = () => {
   const { user, signOut } = useAuth();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false);
+
+  /* Avatar State */
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
+
+  /* Fetch Profile Logic */
+  useEffect(() => {
+    if (!user) return;
+
+    const fetchProfile = async () => {
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("avatar_url")
+        .eq("id", user.id)
+        .single();
+
+      if (profile?.avatar_url) {
+        setAvatarUrl(profile.avatar_url);
+      }
+    };
+
+    fetchProfile();
+  }, [user]);
 
   const menuNavigation = [
     { name: "Hackathons", link: "/hackathon" },
@@ -55,8 +78,9 @@ const Header = () => {
               >
                 <Avatar>
                   <AvatarImage
-                    src={user.user_metadata?.avatar_url || "https://github.com/shadcn.png"}
+                    src={avatarUrl || user.user_metadata?.avatar_url || "https://github.com/shadcn.png"}
                     alt={user.user_metadata?.full_name || "User"}
+                    className="object-cover"
                   />
                   <AvatarFallback className="uppercase">
                     {user.email?.[0] || "U"}
