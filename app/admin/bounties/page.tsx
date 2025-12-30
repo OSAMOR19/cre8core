@@ -22,6 +22,34 @@ const AdminBounties = () => {
     const [loading, setLoading] = useState(true);
     const [successModalOpen, setSuccessModalOpen] = useState(false);
     const [successMessage, setSuccessMessage] = useState("");
+    const [activeTab, setActiveTab] = useState<"pending" | "live">("pending");
+
+    const fetchBounties = async (status: "pending" | "live") => {
+        try {
+            setLoading(true);
+            let query = supabase
+                .from("bounties")
+                .select("*")
+                .order("created_at", { ascending: false });
+
+            if (status === "pending") {
+                query = query.eq("status", "pending");
+            } else {
+                // "live" means "Open" (or essentially not pending/rejected, but user asked for "live")
+                query = query.eq("status", "Open");
+            }
+
+            const { data, error } = await query;
+
+            if (error) throw error;
+            setBounties(data || []);
+        } catch (error) {
+            console.error("Error fetching bounties:", error);
+            // Don't redirect here, just show empty
+        } finally {
+            setLoading(false);
+        }
+    };
 
     const checkAdminAndFetch = async () => {
         setLoading(true);
@@ -43,31 +71,22 @@ const AdminBounties = () => {
                 return;
             }
 
-            // Is Admin -> Fetch Bounties
-            const { data, error } = await supabase
-                .from("bounties")
-                .select("*")
-                .eq("status", "pending")
-                .order("created_at", { ascending: false });
-
-            if (error) throw error;
-            setBounties(data || []);
+            // Is Admin -> Fetch init tab
+            fetchBounties(activeTab);
 
         } catch (error) {
             console.error("Error accessing admin panel:", error);
             router.push("/");
-        } finally {
             setLoading(false);
         }
     };
 
     useEffect(() => {
         checkAdminAndFetch();
-    }, []);
+    }, [activeTab]); // added activeTab dependency
 
     const handleApprove = async (id: string, email: string) => {
         try {
-            // 1. Update status to 'Open'
             const { error } = await supabase
                 .from("bounties")
                 .update({ status: "Open" })
@@ -75,7 +94,6 @@ const AdminBounties = () => {
 
             if (error) throw error;
 
-            // 2. Refresh list
             setBounties((prev) => prev.filter((b) => b.id !== id));
             setSuccessMessage("Bounty has been successfully approved and is now live on the platform.");
             setSuccessModalOpen(true);
@@ -87,7 +105,7 @@ const AdminBounties = () => {
     };
 
     const handleReject = async (id: string) => {
-        if (!confirm("Are you sure you want to reject this bounty? It will not be published.")) return;
+        if (!confirm("Are you sure you want to reject/unpublish this bounty?")) return;
 
         try {
             const { error } = await supabase
@@ -98,7 +116,7 @@ const AdminBounties = () => {
             if (error) throw error;
 
             setBounties((prev) => prev.filter((b) => b.id !== id));
-            alert("Bounty Rejected.");
+            alert("Bounty Rejected/Unpublished.");
         } catch (error) {
             console.error("Error rejecting bounty:", error);
             alert("Failed to reject bounty.");
@@ -122,11 +140,34 @@ const AdminBounties = () => {
 
     return (
         <div className="container mx-auto px-4 py-8 mt-20">
-            <h1 className="text-3xl font-bold mb-6">Admin Portal: Pending Bounties</h1>
+            <h1 className="text-3xl font-bold mb-6">Admin Portal</h1>
+
+            {/* Tabs */}
+            <div className="flex gap-4 mb-8 border-b border-gray-200 pb-4">
+                <button
+                    onClick={() => setActiveTab("pending")}
+                    className={`px-6 py-2 rounded-full font-medium transition-colors ${activeTab === "pending"
+                            ? "bg-[#EBB643] text-black"
+                            : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                        }`}
+                >
+                    Pending Reviews
+                </button>
+                <button
+                    onClick={() => setActiveTab("live")}
+                    className={`px-6 py-2 rounded-full font-medium transition-colors ${activeTab === "live"
+                            ? "bg-[#EBB643] text-black"
+                            : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                        }`}
+                >
+                    Live Bounties
+                </button>
+            </div>
+
             <p className="text-gray-600 mb-8">
-                Review user-submitted bounties. Approved bounties will go live on the platform.
-                <br />
-                <span className="text-sm">Official Email: cre8corelabs@gmail.com</span>
+                {activeTab === "pending"
+                    ? "Review user-submitted bounties. Approved bounties will go live."
+                    : "Manage currently live bounties on the platform."}
             </p>
 
             {loading ? (
@@ -135,7 +176,7 @@ const AdminBounties = () => {
                 </div>
             ) : bounties.length === 0 ? (
                 <div className="text-center py-20 bg-gray-50 rounded-xl border border-dashed border-gray-300">
-                    <p className="text-gray-500 text-lg">No pending bounties to review.</p>
+                    <p className="text-gray-500 text-lg">No {activeTab} bounties found.</p>
                 </div>
             ) : (
                 <div className="grid grid-cols-1 gap-6">
@@ -164,8 +205,12 @@ const AdminBounties = () => {
                                 <div className="flex items-start justify-between">
                                     <div>
                                         <h2 className="text-xl font-bold text-slate-900">{bounty.title}</h2>
-                                        <span className="inline-block bg-yellow-100 text-yellow-800 text-xs px-2 py-1 rounded-full mt-1">
+                                        <span className="inline-block bg-yellow-100 text-yellow-800 text-xs px-2 py-1 rounded-full mt-1 mr-2">
                                             {bounty.category}
+                                        </span>
+                                        <span className={`inline-block text-xs px-2 py-1 rounded-full mt-1 ${bounty.status === 'Open' ? 'bg-green-100 text-green-800' : 'bg-orange-100 text-orange-800'
+                                            }`}>
+                                            {bounty.status}
                                         </span>
                                     </div>
                                     <div className="text-right">
@@ -183,19 +228,23 @@ const AdminBounties = () => {
                             </div>
 
                             {/* Actions */}
-                            <div className="flex flex-row md:flex-col gap-2 justify-center border-t md:border-t-0 md:border-l border-gray-100 pt-4 md:pt-0 md:pl-6">
-                                <Button
-                                    onClick={() => handleApprove(bounty.id, "")}
-                                    className="bg-green-600 hover:bg-green-700 text-white rounded-full px-6 w-full"
-                                >
-                                    Approve
-                                </Button>
+                            <div className="flex flex-row md:flex-col gap-2 justify-center border-t md:border-t-0 md:border-l border-gray-100 pt-4 md:pt-0 md:pl-6 min-w-[200px]">
+                                {activeTab === "pending" && (
+                                    <Button
+                                        onClick={() => handleApprove(bounty.id, "")}
+                                        className="bg-green-600 hover:bg-green-700 text-white rounded-full px-6 w-full"
+                                    >
+                                        Approve
+                                    </Button>
+                                )}
+
                                 <Button
                                     onClick={() => handleReject(bounty.id)}
                                     className="bg-orange-500 hover:bg-orange-600 text-white rounded-full px-6 w-full"
                                 >
-                                    Reject
+                                    {activeTab === "pending" ? "Reject" : "Unpublish"}
                                 </Button>
+
                                 <Button
                                     onClick={() => handleDelete(bounty.id)}
                                     variant="destructive"

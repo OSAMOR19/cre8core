@@ -30,3 +30,27 @@ WHERE id = (
 ```
 
 **Note:** Only users with the `role` set to `'admin'` can see or access the portal. attempting to visit the URL directly will redirect non-admins to the home page.
+
+## 3. TroubleShooting: "Delete" or "Approve" Not Working?
+If you click buttons and nothing happens, your database "Permissions" (Row Level Security) might be blocking you.
+Run this SQL in Supabase to fix it:
+
+```sql
+-- 1. Enable RLS
+ALTER TABLE bounties ENABLE ROW LEVEL SECURITY;
+
+-- 2. Allow Admins to UPDATE (Approve/Reject)
+CREATE POLICY "Allow Admin Update"
+ON bounties FOR UPDATE
+USING ( auth.uid() IN (SELECT id FROM profiles WHERE role = 'admin') );
+
+-- 3. Allow Admins to DELETE
+CREATE POLICY "Allow Admin Delete"
+ON bounties FOR DELETE
+USING ( auth.uid() IN (SELECT id FROM profiles WHERE role = 'admin') );
+
+-- 4. Allow Public to View Bounties
+CREATE POLICY "Allow Public Read Access on Bounties"
+ON bounties FOR SELECT
+USING (true);
+```

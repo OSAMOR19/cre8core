@@ -19,7 +19,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { AlertTriangle } from "lucide-react";
+import { AlertTriangle, Eye, EyeOff } from "lucide-react";
 
 const Login = () => {
   const router = useRouter();
@@ -30,6 +30,37 @@ const Login = () => {
     email: "",
     password: "",
   });
+  const [showPassword, setShowPassword] = React.useState(false);
+  const [resetLoading, setResetLoading] = React.useState(false);
+
+  const togglePasswordVisibility = () => {
+    setShowPassword(!showPassword);
+  };
+
+  const handleForgotPassword = async () => {
+    if (!formData.email) {
+      setErrorMessage("Please enter your email address first to reset your password.");
+      setShowErrorModal(true);
+      return;
+    }
+
+    setResetLoading(true);
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(formData.email, {
+        redirectTo: `${window.location.origin}/update-password`,
+      });
+
+      if (error) throw error;
+
+      alert("Password reset email sent! Check your inbox.");
+    } catch (error: any) {
+      console.error("Reset password error:", error);
+      setErrorMessage(error.message || "Failed to send reset email.");
+      setShowErrorModal(true);
+    } finally {
+      setResetLoading(false);
+    }
+  };
 
   // Check if user is already logged in (e.g. after clicking email confirmation)
   React.useEffect(() => {
@@ -233,12 +264,19 @@ const Login = () => {
                 <CiLock size={20} />
                 <input
                   className="flex-1 bg-transparent focus:outline-none active:bg-transparent p-1 focus:bg-transparent autofill:bg-transparent text-white"
-                  type="password"
+                  type={showPassword ? "text" : "password"}
                   name="password"
                   placeholder="Password"
                   value={formData.password}
                   onChange={handleChange}
                 />
+                <button
+                  type="button"
+                  onClick={togglePasswordVisibility}
+                  className="text-gray-400 hover:text-white focus:outline-none"
+                >
+                  {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                </button>
               </div>
             </div>
             <span className="w-full items-center flex justify-between text-[12px] mt-4 px-1 font-light">
@@ -251,7 +289,12 @@ const Login = () => {
                 />
                 <label htmlFor="checkbox" className="cursor-pointer">Remember me</label>
               </span>
-              <span className="cursor-pointer hover:underline">Forgot password?</span>
+              <span
+                className="cursor-pointer hover:underline text-[#EBB643]"
+                onClick={handleForgotPassword}
+              >
+                {resetLoading ? "Sending..." : "Forgot password?"}
+              </span>
             </span>
             <button
               onClick={handleLogin}

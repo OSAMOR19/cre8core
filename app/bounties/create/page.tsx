@@ -135,7 +135,7 @@ const CreateBounty = () => {
             <div className="flex flex-col space-y-1 ">
               <h1 className="text-[32px] font-semibold">Bounty Details</h1>
               <p className="text-[#666666] text-sm font-montserrat">
-                Fill in the information about your bounty or hackathon
+                Fill in the information about your bounty or sprint
               </p>
             </div>
 
