@@ -20,6 +20,7 @@ const Header = () => {
 
   /* Avatar State */
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
+  const [isAdmin, setIsAdmin] = useState(false);
 
   /* Fetch Profile Logic */
   useEffect(() => {
@@ -28,12 +29,15 @@ const Header = () => {
     const fetchProfile = async () => {
       const { data: profile } = await supabase
         .from("profiles")
-        .select("avatar_url")
+        .select("avatar_url, role")
         .eq("id", user.id)
         .single();
 
       if (profile?.avatar_url) {
         setAvatarUrl(profile.avatar_url);
+      }
+      if (profile?.role === 'admin') {
+        setIsAdmin(true);
       }
     };
 
@@ -166,6 +170,15 @@ const Header = () => {
               </div>
               {isProfileDropdownOpen && (
                 <div className="absolute right-0 top-full mt-2 w-48 bg-white border border-gray-100 shadow-lg rounded-lg z-50 py-2">
+                  {isAdmin && (
+                    <Link
+                      href="/admin/bounties"
+                      className="block px-4 py-2 text-slate-700 hover:bg-gray-50 transition-colors font-montserrat font-semibold text-[#EBB643]"
+                      onClick={() => setIsProfileDropdownOpen(false)}
+                    >
+                      Admin Portal
+                    </Link>
+                  )}
                   <Link
                     href="/profile"
                     className="block px-4 py-2 text-slate-700 hover:bg-gray-50 transition-colors font-montserrat"

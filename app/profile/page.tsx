@@ -9,6 +9,7 @@ import {
   DollarSign,
   Award,
   Star,
+  Mail,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -57,7 +58,7 @@ const ProfilePage = () => {
           .single();
 
         if (profileData) {
-          setProfile(profileData);
+          setProfile({ ...profileData, email: user.email });
         } else {
           setProfile({
             id: user.id,
@@ -67,7 +68,8 @@ const ProfilePage = () => {
             location: "Unknown",
             website: "",
             skills: [],
-            avatar_url: ""
+            avatar_url: "",
+            email: user.email
           });
         }
 
@@ -248,6 +250,12 @@ const ProfilePage = () => {
                     <LinkIcon size={16} />
                     <span className="font-montserrat">
                       {profile.website || "No website"}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Mail size={16} />
+                    <span className="font-montserrat">
+                      {profile.email || "No email"}
                     </span>
                   </div>
                 </div>

@@ -54,7 +54,10 @@ const MainContent = () => {
                 One platform, infinite campaigns, endless creator rewards.
               </motion.p>
               <motion.div variants={fadeInUp} className="flex flex-col sm:flex-row gap-4 justify-center md:justify-start">
-                <Button className="bg-[#DCBD7A] hover:bg-[#d9a532] text-[#030406] font-medium px-8 py-6 rounded-full font-montserrat text-lg transition-transform active:scale-95">
+                <Button
+                  onClick={() => router.push("/bounties")}
+                  className="bg-[#DCBD7A] hover:bg-[#d9a532] text-[#030406] font-medium px-8 py-6 rounded-full font-montserrat text-lg transition-transform active:scale-95"
+                >
                   Become a creator
                 </Button>
                 <Button

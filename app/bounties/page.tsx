@@ -79,6 +79,7 @@ export default function BountiesPage() {
         const { data, error } = await supabase
           .from("bounties")
           .select("*")
+          .eq("status", "Open")
           .order("created_at", { ascending: false });
 
         if (mounted) {
@@ -110,11 +111,38 @@ export default function BountiesPage() {
           schema: "public",
           table: "bounties",
         },
-        (payload) => {
+        async (payload) => {
           if (payload.eventType === "INSERT") {
-            setBountiesList((prev) => [payload.new as Bounty, ...prev]);
+            const newBounty = payload.new as Bounty;
+            if (newBounty.status === "Open") {
+              setBountiesList((prev) => [newBounty, ...prev]);
+            }
           } else if (payload.eventType === "UPDATE") {
-            setBountiesList((prev) => prev.map(b => b.id === payload.new.id ? payload.new as Bounty : b));
+            const newBounty = payload.new as Bounty;
+            // Fetch fresh data to ensure we have all fields (category, etc)
+            // in case payload is partial
+            if (newBounty.status === "Open") {
+              const { data: freshBounty } = await supabase
+                .from("bounties")
+                .select("*")
+                .eq("id", newBounty.id)
+                .single();
+
+              if (freshBounty) {
+                setBountiesList((prev) => {
+                  const exists = prev.find(b => b.id === freshBounty.id);
+                  if (exists) {
+                    return prev.map(b => b.id === freshBounty.id ? freshBounty : b);
+                  } else {
+                    // Add to top
+                    return [freshBounty, ...prev];
+                  }
+                });
+              }
+            } else {
+              // If status changed to something else (e.g. closed/rejected), remove it
+              setBountiesList((prev) => prev.filter(b => b.id !== newBounty.id));
+            }
           } else if (payload.eventType === "DELETE") {
             setBountiesList((prev) => prev.filter(b => b.id !== payload.old.id));
           }
@@ -146,14 +174,22 @@ export default function BountiesPage() {
     return (
       <motion.div variants={fadeInUp}>
         <Card className="p-0 rounded-lg hover:shadow-lg transition-shadow cursor-pointer h-full flex flex-col">
-          <CardHeader className="flex items-center justify-center border-b pb-4">
-            <Image
-              src="/images/bountyCircle.svg"
-              alt="Bounty Image"
-              width={150}
-              height={100}
-              className=""
-            />
+          <CardHeader className="flex items-center justify-center border-b pb-4 p-0 overflow-hidden rounded-t-lg h-48 relative bg-gray-50">
+            {bounty.image_url ? (
+              <img
+                src={bounty.image_url}
+                alt={bounty.title}
+                className="w-full h-full object-cover"
+              />
+            ) : (
+              <Image
+                src="/images/bountyCircle.svg"
+                alt="Bounty Image"
+                width={150}
+                height={100}
+                className="object-contain"
+              />
+            )}
           </CardHeader>
           <CardDescription className="mt-4 mb-6 px-4 flex-grow flex flex-col">
             <div className="flex justify-between items-center">

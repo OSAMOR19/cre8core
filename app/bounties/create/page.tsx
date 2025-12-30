@@ -19,7 +19,42 @@ const CreateBounty = () => {
     deadline: "",
     location: "Remote",
     sponsor: "BASE", // Default or user's company
+    imageUrl: "",
   });
+
+  const [uploading, setUploading] = useState(false);
+
+  const uploadImage = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    try {
+      setUploading(true);
+
+      if (!event.target.files || event.target.files.length === 0) {
+        throw new Error('You must select an image to upload.');
+      }
+
+      const file = event.target.files[0];
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${Math.random()}.${fileExt}`;
+      const filePath = `${fileName}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from('bounty_images')
+        .upload(filePath, file);
+
+      if (uploadError) {
+        throw uploadError;
+      }
+
+      const { data } = supabase.storage.from('bounty_images').getPublicUrl(filePath);
+
+      setFormData({ ...formData, imageUrl: data.publicUrl });
+
+    } catch (error: any) {
+      alert(error.message);
+    } finally {
+      setUploading(false);
+    }
+  };
 
   const [modalState, setModalState] = useState<{
     isOpen: boolean;
@@ -58,8 +93,9 @@ const CreateBounty = () => {
           prize_pool: `${formData.prize_pool} USDC`,
           deadline: formData.deadline,
           sponsor: formData.sponsor,
-          status: "Open",
-          winners_count: 5
+          status: "pending", // Set status to pending for moderation
+          winners_count: 5,
+          image_url: formData.imageUrl
         },
       ]);
 
@@ -68,8 +104,8 @@ const CreateBounty = () => {
       setModalState({
         isOpen: true,
         type: "success",
-        title: "Bounty Posted!",
-        message: "Your bounty has been successfully created and is now live on the platform.",
+        title: "Bounty Submitted!",
+        message: "Your bounty has been submitted for review. It will be live once approved by our team.",
       });
 
     } catch (error: any) {
@@ -102,7 +138,38 @@ const CreateBounty = () => {
                 Fill in the information about your bounty or hackathon
               </p>
             </div>
-            <div className="flex flex-col space-y-6 mt-10 ">
+
+            <div className="flex flex-col space-y-6 mt-10">
+              {/* Image Upload */}
+              <div className="flex flex-col space-y-2">
+                <label className="font-medium">Project Image</label>
+                <div className="flex items-center space-x-4">
+                  <div className="w-24 h-24 bg-gray-100 rounded-lg flex items-center justify-center overflow-hidden border border-gray-200">
+                    {formData.imageUrl ? (
+                      <img src={formData.imageUrl} alt="Project" className="w-full h-full object-cover" />
+                    ) : (
+                      <span className="text-gray-400 text-xs">No Image</span>
+                    )}
+                  </div>
+                  <div>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={uploadImage}
+                      disabled={uploading}
+                      className="block w-full text-sm text-slate-500
+                              file:mr-4 file:py-2 file:px-4
+                              file:rounded-full file:border-0
+                              file:text-sm file:font-semibold
+                              file:bg-[#EBB643]/10 file:text-[#EBB643]
+                              hover:file:bg-[#EBB643]/20
+                            "
+                    />
+                    {uploading && <p className="text-xs text-gray-500 mt-1">Uploading...</p>}
+                  </div>
+                </div>
+              </div>
+
               <div className="flex flex-col space-y-2">
                 <label htmlFor="title" className="font-medium">
                   Bounty Title <span className="text-red-500">*</span>

@@ -26,6 +26,7 @@ export interface Bounty {
     winners_count: number;
     description: string;
     status: string;
+    image_url?: string;
 }
 
 export interface Profile {
@@ -37,7 +38,8 @@ export interface Profile {
     location?: string;
     bio?: string;
     skills?: string[];
-    role?: string;
+    role?: string; // 'user' | 'admin'
+    email?: string;
 }
 
 export interface BountySubmission {
