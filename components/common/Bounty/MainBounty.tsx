@@ -26,6 +26,18 @@ const MainBounty: React.FC<MainBountyProps> = ({ bounty }) => {
         variants={fadeInUp}
         className="p-8 bg-white rounded-lg shadow-md"
       >
+        <div className="bg-[#EBEDF3] flex gap-3 items-center p-3 rounded-lg mb-6">
+          <RiCheckboxBlankFill color="#0000FF" size={24} />
+          <span>
+            <h2 className="text-lg font-semibold">
+              Sponsored by {bounty.sponsor}
+            </h2>
+            <p className="font-montserrat text-[#030406B8]">
+              Building The Future Of Decentralized Infrastructure
+            </p>
+          </span>
+        </div>
+
         <div className="flex flex-col gap-3 md:flex-row justify-between my-4">
           <div className="flex flex-col md:flex-row md:items-center gap-2">
             <span className="bg-[#D5DCEB61] p-3 rounded-full flex justify-center items-center">
@@ -48,26 +60,16 @@ const MainBounty: React.FC<MainBountyProps> = ({ bounty }) => {
               </span>
             </span>
           </div>
-          <div className="flex flex-col md:text-right">
-            <span className="flex items-center gap-2 font-light text-4xl">
-              <TbMoneybag />
-              <span>{bounty.prize_pool}</span>
+          <div className="flex flex-col md:text-right max-w-[50%]">
+            <span className="flex items-center justify-end gap-2 font-light text-3xl md:text-4xl text-right">
+              <TbMoneybag className="shrink-0" />
+              <span className="break-words w-full">{bounty.prize_pool}</span>
             </span>
             <span className="font-montserrat ">Total Reward</span>
           </div>
         </div>
 
-        <div className="bg-[#EBEDF3] flex gap-3 items-center p-3 rounded-lg">
-          <RiCheckboxBlankFill color="#0000FF" size={24} />
-          <span>
-            <h2 className="text-lg font-semibold">
-              Sponsored by {bounty.sponsor}
-            </h2>
-            <p className="font-montserrat text-[#030406B8]">
-              Building The Future Of Decentralized Infrastructure
-            </p>
-          </span>
-        </div>
+
         <div className="bg-[#DCBD7A36] p-5 rounded-2xl my-5">
           <h5 className="text-[#9B6A00] text-lg font-nunito my-1">
             $ Prize Pool: {bounty.prize_pool}

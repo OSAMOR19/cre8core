@@ -125,12 +125,12 @@ const Navbar = () => {
 
         {/* Desktop Navigation */}
         <div className="hidden md:flex items-center space-x-8 text-slate-700 font-normal font-montserrat">
-          <Link
+          {/* <Link
             href="/hackathon"
             className="hover:text-blue-600 transition-colors"
           >
             Hackathons
-          </Link>
+          </Link> */}
           <div className="relative group cursor-pointer flex items-center gap-1 hover:text-blue-600 transition-colors">
             <span>Bounties</span>
             <ChevronDown size={16} />
@@ -145,14 +145,17 @@ const Navbar = () => {
               {/* Add more dropdown items here */}
             </div>
           </div>
-          <Link
+          {/* <Link
             href="/grants"
             className="hover:text-blue-600 transition-colors"
           >
             Grants
-          </Link>
+          </Link> */}
           <Link href="/jobs" className="hover:text-blue-600 transition-colors">
             Jobs
+          </Link>
+          <Link href="/waitlist" className="hover:text-blue-600 transition-colors">
+            Waitlist
           </Link>
           <Link href="/about" className="hover:text-blue-600 transition-colors">
             About

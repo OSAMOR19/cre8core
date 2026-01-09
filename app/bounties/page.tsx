@@ -12,12 +12,14 @@ import { motion } from "framer-motion";
 import { supabase } from "@/lib/supabase";
 import { Bounty } from "@/lib/types";
 import { Skeleton } from "@/components/ui/skeleton";
+import TermsModal from "@/components/common/TermsModal";
 
 export default function BountiesPage() {
   const router = useRouter();
   const [tab, setTab] = useState("All");
   const [bountiesList, setBountiesList] = useState<Bounty[]>([]);
   const [loading, setLoading] = useState(true);
+  const [showTerms, setShowTerms] = useState(false);
 
   // Fallback data for demo purposes if DB is empty
   const fallbackBounties: Bounty[] = [
@@ -192,8 +194,11 @@ export default function BountiesPage() {
             )}
           </CardHeader>
           <CardDescription className="mt-4 mb-6 px-4 flex-grow flex flex-col">
+            <div className="flex flex-col gap-1 mb-2">
+              <span className="text-[#DCBD7A] text-xs uppercase tracking-wider font-bold">Sponsor</span>
+              <p className="text-black text-xl font-bold font-nunito">{bounty.sponsor || "BASE"}</p>
+            </div>
             <div className="flex justify-between items-center">
-              <p className="text-[#DCBD7A] text-lg font-nunito">{bounty.sponsor || "BASE"}</p>
               <span className="bg-[#DCBD7A] text-[#9B6A00] px-5 py-1 rounded-full text-sm">
                 {bounty.category}
               </span>
@@ -332,10 +337,10 @@ export default function BountiesPage() {
       >
         <h2 className="text-2xl font-medium">All Bounties</h2>
         <Button
-          onClick={() => router.push("/bounties/create")}
+          onClick={() => setShowTerms(true)}
           className="bg-[#E4B95C] hover:bg-[#E4B95C]/50 px-8 py-5 rounded-full font-light text-black transition-transform active:scale-95"
         >
-          Post bounty
+          Post Bounty
         </Button>
       </motion.div>
       <motion.p
@@ -382,6 +387,12 @@ export default function BountiesPage() {
         ))}
       </motion.div>
       <div className="my-6">{renderBounties()}</div>
+
+      <TermsModal
+        isOpen={showTerms}
+        onClose={() => setShowTerms(false)}
+        onProceed={() => router.push("/bounties/create")}
+      />
     </div>
   );
 }

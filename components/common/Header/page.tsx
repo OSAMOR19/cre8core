@@ -45,10 +45,11 @@ const Header = () => {
   }, [user]);
 
   const menuNavigation = [
-    { name: "Hackathons", link: "/hackathon" },
+    // { name: "Hackathons", link: "/hackathon" },
     { name: "Bounties", link: "/bounties", submenu: true },
-    { name: "Grants", link: "/grants" },
+    // { name: "Grants", link: "/grants" },
     { name: "Jobs", link: "/jobs" },
+    { name: "Waitlist", link: "/waitlist" },
     { name: "About", link: "/about" },
   ];
 

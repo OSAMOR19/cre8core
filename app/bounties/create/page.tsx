@@ -13,14 +13,36 @@ const CreateBounty = () => {
   const [formData, setFormData] = useState({
     title: "",
     description: "",
-    category: "Development",
-    type: "Traditional",
-    prize_pool: "",
+    category: "Video", // Default to first valid option
+    type: "Contest",   // Default to first valid option
     deadline: "",
-    location: "Remote",
-    sponsor: "BASE", // Default or user's company
+    sponsor: "BASE",
     imageUrl: "",
   });
+
+  // State for segmented prize pool
+  const [prizes, setPrizes] = useState([{ position: "1st Place", amount: "" }]);
+
+  const addPrizeRow = () => {
+    const nextPos = prizes.length + 1;
+    let positionLabel = `${nextPos}th Place`;
+    if (nextPos === 2) positionLabel = "2nd Place";
+    if (nextPos === 3) positionLabel = "3rd Place";
+    setPrizes([...prizes, { position: positionLabel, amount: "" }]);
+  };
+
+  const removePrizeRow = (index: number) => {
+    if (prizes.length > 1) {
+      const newPrizes = prizes.filter((_, i) => i !== index);
+      setPrizes(newPrizes);
+    }
+  };
+
+  const updatePrize = (index: number, field: "position" | "amount", value: string) => {
+    const newPrizes = [...prizes];
+    newPrizes[index] = { ...newPrizes[index], [field]: value };
+    setPrizes(newPrizes);
+  };
 
   const [uploading, setUploading] = useState(false);
 
@@ -79,22 +101,32 @@ const CreateBounty = () => {
     }
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+
+
+  const submitToSupabase = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
 
     try {
+      // Calculate total prize pool
+      const totalAmount = prizes.reduce((sum, item) => sum + (Number(item.amount) || 0), 0);
+
+      // Format full prize string
+      // e.g. "5000 USDC (1st: 2500, 2nd: 1500, 3rd: 1000)"
+      const breakdown = prizes.map(p => `${p.position}: ${p.amount}`).join(", ");
+      const formattedPrizePool = `${totalAmount} USDC (${breakdown})`;
+
       const { data, error } = await supabase.from("bounties").insert([
         {
           title: formData.title,
           description: formData.description,
           category: formData.category,
-          // type: formData.type, 
-          prize_pool: `${formData.prize_pool} USDC`,
+          // type: formData.type, // Assuming type column might not exist or isn't used yet in DB based on previous code comment
+          prize_pool: formattedPrizePool,
           deadline: formData.deadline,
           sponsor: formData.sponsor,
-          status: "pending", // Set status to pending for moderation
-          winners_count: 5,
+          status: "pending",
+          winners_count: prizes.length,
           image_url: formData.imageUrl
         },
       ]);
@@ -131,7 +163,7 @@ const CreateBounty = () => {
       </div>
       <div className="bg-white px-10 py-8 rounded-2xl shadow-sm border border-gray-100">
         <div>
-          <form onSubmit={handleSubmit}>
+          <form onSubmit={submitToSupabase}>
             <div className="flex flex-col space-y-1 ">
               <h1 className="text-[32px] font-semibold">Bounty Details</h1>
               <p className="text-[#666666] text-sm font-montserrat">
@@ -140,33 +172,49 @@ const CreateBounty = () => {
             </div>
 
             <div className="flex flex-col space-y-6 mt-10">
-              {/* Image Upload */}
-              <div className="flex flex-col space-y-2">
-                <label className="font-medium">Project Image</label>
-                <div className="flex items-center space-x-4">
-                  <div className="w-24 h-24 bg-gray-100 rounded-lg flex items-center justify-center overflow-hidden border border-gray-200">
-                    {formData.imageUrl ? (
-                      <img src={formData.imageUrl} alt="Project" className="w-full h-full object-cover" />
-                    ) : (
-                      <span className="text-gray-400 text-xs">No Image</span>
-                    )}
+              {/* Sponsor & Logo Section */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-start">
+                <div className="flex flex-col space-y-2">
+                  <label className="font-medium">Project Logo</label>
+                  <div className="flex items-center space-x-4">
+                    <div className="w-24 h-24 bg-gray-100 rounded-lg flex items-center justify-center overflow-hidden border border-gray-200">
+                      {formData.imageUrl ? (
+                        <img src={formData.imageUrl} alt="Project" className="w-full h-full object-cover" />
+                      ) : (
+                        <span className="text-gray-400 text-xs">No Logo</span>
+                      )}
+                    </div>
+                    <div>
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={uploadImage}
+                        disabled={uploading}
+                        className="block w-full text-sm text-slate-500
+                                  file:mr-4 file:py-2 file:px-4
+                                  file:rounded-full file:border-0
+                                  file:text-sm file:font-semibold
+                                  file:bg-[#EBB643]/10 file:text-[#EBB643]
+                                  hover:file:bg-[#EBB643]/20
+                                "
+                      />
+                      {uploading && <p className="text-xs text-gray-500 mt-1">Uploading...</p>}
+                    </div>
                   </div>
-                  <div>
-                    <input
-                      type="file"
-                      accept="image/*"
-                      onChange={uploadImage}
-                      disabled={uploading}
-                      className="block w-full text-sm text-slate-500
-                              file:mr-4 file:py-2 file:px-4
-                              file:rounded-full file:border-0
-                              file:text-sm file:font-semibold
-                              file:bg-[#EBB643]/10 file:text-[#EBB643]
-                              hover:file:bg-[#EBB643]/20
-                            "
-                    />
-                    {uploading && <p className="text-xs text-gray-500 mt-1">Uploading...</p>}
-                  </div>
+                </div>
+
+                <div className="flex flex-col space-y-2">
+                  <label htmlFor="sponsor" className="font-medium">
+                    Sponsor Name
+                  </label>
+                  <input
+                    type="text"
+                    id="sponsor"
+                    value={formData.sponsor}
+                    onChange={handleChange}
+                    className="border border-gray-300 rounded-md p-3 focus:outline-none focus:ring-2 focus:ring-[#E4B95C]"
+                    placeholder="e.g., BASE"
+                  />
                 </div>
               </div>
 
@@ -211,7 +259,6 @@ const CreateBounty = () => {
                     onChange={handleChange}
                     className="border border-gray-300 rounded-md p-3 bg-white focus:outline-none focus:ring-2 focus:ring-[#E4B95C]"
                   >
-                    <option value="Development">Development</option>
                     <option value="Video">Video</option>
                     <option value="Meme">Meme</option>
                     <option value="Threads">Threads</option>
@@ -229,71 +276,72 @@ const CreateBounty = () => {
                     onChange={handleChange}
                     className="border border-gray-300 rounded-md p-3 bg-white focus:outline-none focus:ring-2 focus:ring-[#E4B95C]"
                   >
-                    <option value="Traditional">Traditional</option>
                     <option value="Contest">Contest</option>
-                    <option value="Hackathon">Hackathon</option>
+                    <option value="Sprint">Sprint</option>
                   </select>
                 </div>
               </div>
 
-              <div className="w-full grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="flex flex-col space-y-2">
-                  <label htmlFor="prize_pool" className="font-medium">
-                    Prize Pool (USDC) <span className="text-red-500">*</span>
+              {/* Dynamic Prize Pool Section */}
+              <div className="flex flex-col space-y-4">
+                <div className="flex justify-between items-center">
+                  <label className="font-medium">
+                    Prize Pool Breakdown <span className="text-red-500">*</span>
                   </label>
-                  <input
-                    type="number"
-                    id="prize_pool"
-                    required
-                    value={formData.prize_pool}
-                    onChange={handleChange}
-                    className="border border-gray-300 rounded-md p-3 focus:outline-none focus:ring-2 focus:ring-[#E4B95C]"
-                    placeholder="e.g., 5000"
-                  />
+                  <button type="button" onClick={addPrizeRow} className="text-sm text-[#E4B95C] font-semibold hover:underline">
+                    + Add Position
+                  </button>
                 </div>
 
-                <div className="flex flex-col space-y-2">
-                  <label htmlFor="deadline" className="font-medium">
-                    Deadline <span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    type="date"
-                    id="deadline"
-                    required
-                    value={formData.deadline}
-                    onChange={handleChange}
-                    className="border border-gray-300 rounded-md p-3 focus:outline-none focus:ring-2 focus:ring-[#E4B95C]"
-                  />
+                {prizes.map((prize, index) => (
+                  <div key={index} className="flex gap-4 items-center">
+                    <input
+                      type="text"
+                      value={prize.position}
+                      onChange={(e) => updatePrize(index, "position", e.target.value)}
+                      className="border border-gray-300 rounded-md p-3 focus:outline-none focus:ring-2 focus:ring-[#E4B95C] w-1/3"
+                      placeholder="Position (e.g. 1st)"
+                    />
+                    <div className="relative flex-1">
+                      <input
+                        type="number"
+                        value={prize.amount}
+                        onChange={(e) => updatePrize(index, "amount", e.target.value)}
+                        className="border border-gray-300 rounded-md p-3 w-full focus:outline-none focus:ring-2 focus:ring-[#E4B95C]"
+                        placeholder="Amount (USDC)"
+                      />
+                      <span className="absolute right-3 top-3 text-gray-500 text-sm">USDC</span>
+                    </div>
+                    {prizes.length > 1 && (
+                      <button
+                        type="button"
+                        onClick={() => removePrizeRow(index)}
+                        className="text-red-500 font-bold px-2 hover:bg-red-50 rounded"
+                      >
+                        ✕
+                      </button>
+                    )}
+                  </div>
+                ))}
+
+                <div className="text-right text-sm font-medium text-gray-600">
+                  Total Pool: {prizes.reduce((sum, item) => sum + (Number(item.amount) || 0), 0)} USDC
                 </div>
               </div>
 
-              <div className="w-full grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="flex flex-col space-y-2">
-                  <label htmlFor="location" className="font-medium">
-                    Location
-                  </label>
-                  <input
-                    type="text"
-                    id="location"
-                    value={formData.location}
-                    onChange={handleChange}
-                    className="border border-gray-300 rounded-md p-3 focus:outline-none focus:ring-2 focus:ring-[#E4B95C]"
-                    placeholder="e.g., Remote, San Francisco"
-                  />
-                </div>
-                <div className="flex flex-col space-y-2">
-                  <label htmlFor="sponsor" className="font-medium">
-                    Sponsor Name
-                  </label>
-                  <input
-                    type="text"
-                    id="sponsor"
-                    value={formData.sponsor}
-                    onChange={handleChange}
-                    className="border border-gray-300 rounded-md p-3 focus:outline-none focus:ring-2 focus:ring-[#E4B95C]"
-                    placeholder="e.g., BASE"
-                  />
-                </div>
+
+              <div className="flex flex-col space-y-2">
+                <label htmlFor="deadline" className="font-medium">
+                  Deadline <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="date"
+                  id="deadline"
+                  required
+                  value={formData.deadline}
+                  onChange={handleChange}
+                  className="border border-gray-300 rounded-md p-3 focus:outline-none focus:ring-2 focus:ring-[#E4B95C]"
+                />
               </div>
 
               <div className="w-full flex flex-col md:flex-row items-center gap-4 mt-4">
@@ -316,6 +364,9 @@ const CreateBounty = () => {
           </form>
         </div>
       </div>
+
+
+
       <StatusModal
         isOpen={modalState.isOpen}
         type={modalState.type}
@@ -326,4 +377,5 @@ const CreateBounty = () => {
     </div>
   );
 };
+
 export default CreateBounty;
