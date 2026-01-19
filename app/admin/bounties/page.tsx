@@ -219,8 +219,25 @@ const AdminBounties = () => {
                                     </div>
                                 </div>
 
+                                {bounty.description && bounty.description.includes("Tx Hash:") && (
+                                    <div className="bg-blue-50 border border-blue-100 p-3 rounded-lg my-2">
+                                        <p className="text-xs text-blue-800 font-semibold mb-1">💰 Payment Verification</p>
+                                        <p className="text-xs text-blue-600 font-mono break-all">
+                                            {bounty.description.split("Tx Hash:")[1].trim()}
+                                        </p>
+                                        <a 
+                                            href={`https://basescan.org/tx/${bounty.description.split("Tx Hash:")[1].trim()}`}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="text-[10px] text-blue-500 underline hover:text-blue-700 mt-1 inline-block"
+                                        >
+                                            View on Basescan ↗
+                                        </a>
+                                    </div>
+                                )}
+
                                 <p className="text-gray-600 text-sm line-clamp-2">
-                                    {bounty.description}
+                                    {bounty.description?.split("**Payment Verification**")[0]}
                                 </p>
                                 <div className="text-xs text-gray-400 pt-2">
                                     Submitted: {new Date(bounty.created_at).toLocaleDateString()}

@@ -44,7 +44,7 @@ const MainContent = () => {
                 variants={fadeInUp}
                 className="text-4xl md:text-5xl text-[#D5DCEB] font-semibold mb-6 font-roboto leading-[1.2]"
               >
-                Cre8core Labs Fueling the Creative Layer of
+                Fueling the Creative Layer of
                 <span className="text-[#EBB643]"> {""}BASE</span>
               </motion.h1>
               <motion.p

@@ -14,12 +14,30 @@ import { Bounty } from "@/lib/types";
 import { Skeleton } from "@/components/ui/skeleton";
 import TermsModal from "@/components/common/TermsModal";
 
+import { useProfile } from "@/hooks/useProfile";
+import { useAuth } from "@/components/providers/AuthProvider";
+
 export default function BountiesPage() {
   const router = useRouter();
+  const { user } = useAuth();
+  const { profile } = useProfile();
   const [tab, setTab] = useState("All");
   const [bountiesList, setBountiesList] = useState<Bounty[]>([]);
   const [loading, setLoading] = useState(true);
   const [showTerms, setShowTerms] = useState(false);
+
+  const handlePostBounty = () => {
+    if (!user) {
+      router.push("/login");
+      return;
+    }
+
+    if (profile?.role === "project" || profile?.role === "admin") {
+      setShowTerms(true);
+    } else {
+      router.push("/project/register");
+    }
+  };
 
   // Fallback data for demo purposes if DB is empty
   const fallbackBounties: Bounty[] = [
@@ -89,7 +107,12 @@ export default function BountiesPage() {
             console.error("Error fetching bounties:", error);
             setBountiesList(fallbackBounties);
           } else {
-            setBountiesList(data || []);
+            // If no bounties found, use fallback data for demo
+            if (!data || data.length === 0) {
+              setBountiesList(fallbackBounties);
+            } else {
+              setBountiesList(data);
+            }
           }
           setLoading(false);
         }
@@ -337,7 +360,7 @@ export default function BountiesPage() {
       >
         <h2 className="text-2xl font-medium">All Bounties</h2>
         <Button
-          onClick={() => setShowTerms(true)}
+          onClick={handlePostBounty}
           className="bg-[#E4B95C] hover:bg-[#E4B95C]/50 px-8 py-5 rounded-full font-light text-black transition-transform active:scale-95"
         >
           Post Bounty

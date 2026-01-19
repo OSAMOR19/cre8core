@@ -6,10 +6,14 @@ import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 import { Button } from "@/components/ui/button";
 import StatusModal from "@/components/common/StatusModal";
+import PaymentModal from "@/components/common/PaymentModal";
 
 const CreateBounty = () => {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
+  const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
+  const [currentTotalAmount, setCurrentTotalAmount] = useState(0);
+
   const [formData, setFormData] = useState({
     title: "",
     description: "",
@@ -101,10 +105,19 @@ const CreateBounty = () => {
     }
   };
 
-
-
-  const submitToSupabase = async (e: React.FormEvent) => {
+  const handleReview = (e: React.FormEvent) => {
     e.preventDefault();
+    const total = prizes.reduce((sum, item) => sum + (Number(item.amount) || 0), 0);
+    if (total <= 0) {
+      alert("Please ensure the total prize pool is greater than 0.");
+      return;
+    }
+    setCurrentTotalAmount(total);
+    setIsPaymentModalOpen(true);
+  };
+
+  const submitToSupabase = async (txHash: string) => {
+    setIsPaymentModalOpen(false);
     setLoading(true);
 
     try {
@@ -119,13 +132,13 @@ const CreateBounty = () => {
       const { data, error } = await supabase.from("bounties").insert([
         {
           title: formData.title,
-          description: formData.description,
+          description: `${formData.description}\n\n**Payment Verification**\nTx Hash: ${txHash}`,
           category: formData.category,
           // type: formData.type, // Assuming type column might not exist or isn't used yet in DB based on previous code comment
           prize_pool: formattedPrizePool,
           deadline: formData.deadline,
           sponsor: formData.sponsor,
-          status: "pending",
+          status: "pending", // Keep as pending for now so it shows up in admin tab which filters for 'pending'
           winners_count: prizes.length,
           image_url: formData.imageUrl
         },
@@ -163,7 +176,7 @@ const CreateBounty = () => {
       </div>
       <div className="bg-white px-10 py-8 rounded-2xl shadow-sm border border-gray-100">
         <div>
-          <form onSubmit={submitToSupabase}>
+          <form onSubmit={handleReview}>
             <div className="flex flex-col space-y-1 ">
               <h1 className="text-[32px] font-semibold">Bounty Details</h1>
               <p className="text-[#666666] text-sm font-montserrat">
@@ -365,7 +378,13 @@ const CreateBounty = () => {
         </div>
       </div>
 
-
+      <PaymentModal
+        isOpen={isPaymentModalOpen}
+        onClose={() => setIsPaymentModalOpen(false)}
+        onConfirm={submitToSupabase}
+        bountyAmount={currentTotalAmount}
+        serviceFeePercent={20}
+      />
 
       <StatusModal
         isOpen={modalState.isOpen}

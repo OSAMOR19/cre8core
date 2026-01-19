@@ -38,7 +38,7 @@ export interface Profile {
     location?: string;
     bio?: string;
     skills?: string[];
-    role?: string; // 'user' | 'admin'
+    role?: 'user' | 'admin' | 'project';
     email?: string;
 }
 
