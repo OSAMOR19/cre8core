@@ -4,8 +4,6 @@ import React, { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
 import { Bounty } from "@/lib/types";
 import { Button } from "@/components/ui/button";
-import Image from "next/image";
-
 import { useRouter } from "next/navigation";
 import {
     Dialog,
@@ -15,6 +13,7 @@ import {
     DialogDescription,
 } from "@/components/ui/dialog";
 import { CheckCircle2 } from "lucide-react";
+import ConfirmationModal from "@/components/common/ConfirmationModal";
 
 const AdminBounties = () => {
     const router = useRouter();
@@ -24,7 +23,24 @@ const AdminBounties = () => {
     const [successMessage, setSuccessMessage] = useState("");
     const [activeTab, setActiveTab] = useState<"pending" | "live">("pending");
 
-    const fetchBounties = async (status: "pending" | "live") => {
+    // Confirmation Modal State
+    const [confirmState, setConfirmState] = useState<{
+        isOpen: boolean;
+        type: "reject" | "unpublish" | "delete" | null;
+        bountyId: string | null;
+    }>({
+        isOpen: false,
+        type: null,
+        bountyId: null,
+    });
+    const [actionLoading, setActionLoading] = useState(false);
+
+    const fetchBounties = async (status: "pending" | "live" | "submissions") => {
+        if (status === "submissions") {
+            setLoading(false);
+            return;
+        }
+
         try {
             setLoading(true);
             let query = supabase
@@ -33,7 +49,7 @@ const AdminBounties = () => {
                 .order("created_at", { ascending: false });
 
             if (status === "pending") {
-                query = query.eq("status", "pending");
+                query = query.in("status", ["pending", "pending_payment"]);
             } else {
                 // "live" means "Open" (or essentially not pending/rejected, but user asked for "live")
                 query = query.eq("status", "Open");
@@ -104,39 +120,48 @@ const AdminBounties = () => {
         }
     };
 
-    const handleReject = async (id: string) => {
-        if (!confirm("Are you sure you want to reject/unpublish this bounty?")) return;
-
-        try {
-            const { error } = await supabase
-                .from("bounties")
-                .update({ status: "rejected" })
-                .eq("id", id);
-
-            if (error) throw error;
-
-            setBounties((prev) => prev.filter((b) => b.id !== id));
-            alert("Bounty Rejected/Unpublished.");
-        } catch (error) {
-            console.error("Error rejecting bounty:", error);
-            alert("Failed to reject bounty.");
-        }
+    const openConfirmModal = (type: "reject" | "unpublish" | "delete", id: string) => {
+        setConfirmState({
+            isOpen: true,
+            type,
+            bountyId: id,
+        });
     };
 
-    const handleDelete = async (id: string) => {
-        if (!confirm("Are you sure you want to PERMANENTLY DELETE this bounty? This cannot be undone.")) return;
+    const handleConfirmAction = async () => {
+        const { type, bountyId } = confirmState;
+        if (!type || !bountyId) return;
+
+        setActionLoading(true);
 
         try {
-            const { error } = await supabase.from("bounties").delete().eq("id", id);
-            if (error) throw error;
+            if (type === "reject" || type === "unpublish") {
+                const { error } = await supabase
+                    .from("bounties")
+                    .update({ status: "rejected" })
+                    .eq("id", bountyId);
 
-            setBounties((prev) => prev.filter((b) => b.id !== id));
-            alert("Bounty Permanently Deleted.");
+                if (error) throw error;
+
+                setBounties((prev) => prev.filter((b) => b.id !== bountyId));
+                // Show success via the status modal if desired, or just close
+                // For rejection, usually no success modal is needed, but we can add one if requested.
+                // User asked for "message is in a central modal", likely meaning the confirmation itself.
+            } else if (type === "delete") {
+                const { error } = await supabase.from("bounties").delete().eq("id", bountyId);
+                if (error) throw error;
+
+                setBounties((prev) => prev.filter((b) => b.id !== bountyId));
+            }
+
+            setConfirmState({ isOpen: false, type: null, bountyId: null });
         } catch (error) {
-            console.error("Error deleting bounty:", error);
-            alert("Failed to delete bounty.");
+            console.error(`Error performing ${type}:`, error);
+            alert(`Failed to ${type} bounty.`);
+        } finally {
+            setActionLoading(false);
         }
-    }
+    };
 
     return (
         <div className="container mx-auto px-4 py-8 mt-20">
@@ -256,14 +281,14 @@ const AdminBounties = () => {
                                 )}
 
                                 <Button
-                                    onClick={() => handleReject(bounty.id)}
+                                    onClick={() => openConfirmModal(activeTab === "pending" ? "reject" : "unpublish", bounty.id)}
                                     className="bg-orange-500 hover:bg-orange-600 text-white rounded-full px-6 w-full"
                                 >
                                     {activeTab === "pending" ? "Reject" : "Unpublish"}
                                 </Button>
 
                                 <Button
-                                    onClick={() => handleDelete(bounty.id)}
+                                    onClick={() => openConfirmModal("delete", bounty.id)}
                                     variant="destructive"
                                     className="bg-red-500 hover:bg-red-600 text-white rounded-full px-6 w-full"
                                 >
@@ -274,6 +299,29 @@ const AdminBounties = () => {
                     ))}
                 </div>
             )}
+
+            <ConfirmationModal
+                isOpen={confirmState.isOpen}
+                onClose={() => setConfirmState({ ...confirmState, isOpen: false })}
+                onConfirm={handleConfirmAction}
+                isLoading={actionLoading}
+                title={
+                    confirmState.type === "delete" ? "Delete Bounty?" :
+                        confirmState.type === "reject" ? "Reject Bounty?" :
+                            "Unpublish Bounty?"
+                }
+                message={
+                    confirmState.type === "delete" ? "Are you sure you want to permanently delete this bounty? This action cannot be undone." :
+                        confirmState.type === "reject" ? "Are you sure you want to reject this submission? It will be removed from the review queue." :
+                            "Are you sure you want to unpublish this bounty? It will no longer be visible to users."
+                }
+                confirmText={
+                    confirmState.type === "delete" ? "Yes, Delete" :
+                        confirmState.type === "reject" ? "Reject Submission" :
+                            "Unpublish"
+                }
+                confirmVariant={confirmState.type === "delete" ? "danger" : "warning"}
+            />
 
             <Dialog open={successModalOpen} onOpenChange={setSuccessModalOpen}>
                 <DialogContent className="sm:max-w-md text-center">

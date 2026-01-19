@@ -2,6 +2,7 @@
 
 import { Button } from "@/components/ui/button";
 import { Card, CardDescription, CardHeader } from "@/components/ui/card";
+import { useRouter } from "next/navigation";
 import React from "react";
 import { GoRocket } from "react-icons/go";
 import { HiOutlineUser } from "react-icons/hi";
@@ -28,6 +29,7 @@ const trendingSkills = [
 ];
 
 const SideBounty: React.FC<SideBountyProps> = ({ bounty }) => {
+  const router = useRouter();
   const fadeInUp = {
     initial: { opacity: 0, x: 20 },
     animate: { opacity: 1, x: 0 },
@@ -67,7 +69,10 @@ const SideBounty: React.FC<SideBountyProps> = ({ bounty }) => {
             <HiOutlineUser /> {bounty.winners_count} Winners
           </span>
         </span>
-        <Button className="bg-[#E4B95C] hover:bg-[#E4B95C]/50 text-white py-5 rounded-full w-full transition-transform active:scale-95">
+        <Button
+          onClick={() => router.push(`/bounties/${bounty.id}/submit`)}
+          className="bg-[#E4B95C] hover:bg-[#E4B95C]/50 text-white py-5 rounded-full w-full transition-transform active:scale-95"
+        >
           Submit Your Work{" "}
         </Button>
         <Button className="border-[#E4B95C] border bg-transparent hover:bg-[#E4B95C]/50 text-black py-5 rounded-full w-full transition-transform active:scale-95">

@@ -44,8 +44,12 @@ export interface Profile {
 
 export interface BountySubmission {
     id: string;
+    created_at: string;
     bounty_id: string;
     user_id: string;
+    content?: string;
+    link?: string;
+    file_url?: string;
     status: 'pending' | 'in_progress' | 'submitted' | 'approved' | 'rejected';
     submitted_at?: string;
     earnings?: number; // Amount earned if approved

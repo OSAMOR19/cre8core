@@ -39,57 +39,8 @@ export default function BountiesPage() {
     }
   };
 
-  // Fallback data for demo purposes if DB is empty
-  const fallbackBounties: Bounty[] = [
-    {
-      id: "1",
-      created_at: new Date().toISOString(),
-      title: "Audit & Optimize Lending Protocol Contracts",
-      category: "Development",
-      sponsor: "BASE",
-      prize_pool: "5000 USDC",
-      deadline: "2025-12-15",
-      winners_count: 5,
-      description: "Security audit and gas optimization for our lending protocol smart contracts. Experience with Defi security required. Must provide audit report...",
-      status: "Open"
-    },
-    {
-      id: "2",
-      created_at: new Date().toISOString(),
-      title: "Create a Promo Video for Base",
-      category: "Video",
-      sponsor: "BASE",
-      prize_pool: "1000 USDC",
-      deadline: "2025-01-20",
-      winners_count: 3,
-      description: "Create a 1 minute high-energy promotional video showcasing Base features.",
-      status: "Open"
-    },
-    {
-      id: "3",
-      created_at: new Date().toISOString(),
-      title: "Design a Meme Collection",
-      category: "Meme",
-      sponsor: "BASE",
-      prize_pool: "500 USDC",
-      deadline: "2025-01-10",
-      winners_count: 10,
-      description: "Create a set of 5 viral memes about the Base ecosystem.",
-      status: "Open"
-    },
-    {
-      id: "4",
-      created_at: new Date().toISOString(),
-      title: "Write a Thread about Base vs Others",
-      category: "Threads",
-      sponsor: "BASE",
-      prize_pool: "200 USDC",
-      deadline: "2025-01-05",
-      winners_count: 20,
-      description: "Write a comprehensive thread comparing Base L2 to other L2 solutions.",
-      status: "Open"
-    }
-  ];
+  // Removed fallback data as per request
+  const fallbackBounties: Bounty[] = [];
 
   useEffect(() => {
     let mounted = true;
@@ -105,21 +56,16 @@ export default function BountiesPage() {
         if (mounted) {
           if (error) {
             console.error("Error fetching bounties:", error);
-            setBountiesList(fallbackBounties);
+            setBountiesList([]);
           } else {
-            // If no bounties found, use fallback data for demo
-            if (!data || data.length === 0) {
-              setBountiesList(fallbackBounties);
-            } else {
-              setBountiesList(data);
-            }
+            setBountiesList(data || []);
           }
           setLoading(false);
         }
       } catch (err) {
         console.error("Unexpected error:", err);
         if (mounted) {
-          setBountiesList(fallbackBounties);
+          setBountiesList([]);
           setLoading(false);
         }
       }
