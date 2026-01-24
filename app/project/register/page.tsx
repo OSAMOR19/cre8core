@@ -18,6 +18,8 @@ export default function ProjectRegistrationPage() {
         projectName: "",
         website: "",
         description: "",
+        twitter: "",
+        telegram: "",
     });
     const [logoFile, setLogoFile] = useState<File | null>(null);
     const [previewUrl, setPreviewUrl] = useState<string | null>(null);
@@ -59,7 +61,9 @@ export default function ProjectRegistrationPage() {
                     bio: formData.description,
                     avatar_url: logoUrl,
                     role: "project",
-                })
+                    twitter_handle: formData.twitter,
+                    telegram_handle: formData.telegram 
+                } as any)
                 .eq("id", user.id);
 
             if (error) throw error;
@@ -155,6 +159,48 @@ export default function ProjectRegistrationPage() {
                                             onChange={handleChange}
                                             className="w-full px-4 py-6 rounded-xl border-gray-200 focus:border-[#E4B95C] focus:ring-[#E4B95C]/20 transition-all font-medium"
                                         />
+                                    </div>
+
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                        <div className="space-y-2">
+                                            <label
+                                                htmlFor="twitter"
+                                                className="block text-sm font-semibold text-gray-900"
+                                            >
+                                                Twitter Handle
+                                            </label>
+                                            <div className="relative">
+                                                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 font-medium">@</span>
+                                                <Input
+                                                    id="twitter"
+                                                    name="twitter"
+                                                    placeholder="cre8core"
+                                                    value={formData.twitter}
+                                                    onChange={handleChange}
+                                                    className="w-full pl-8 pr-4 py-6 rounded-xl border-gray-200 focus:border-[#E4B95C] focus:ring-[#E4B95C]/20 transition-all font-medium"
+                                                />
+                                            </div>
+                                        </div>
+
+                                        <div className="space-y-2">
+                                            <label
+                                                htmlFor="telegram"
+                                                className="block text-sm font-semibold text-gray-900"
+                                            >
+                                                Telegram Handle
+                                            </label>
+                                            <div className="relative">
+                                                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 font-medium">@</span>
+                                                <Input
+                                                    id="telegram"
+                                                    name="telegram"
+                                                    placeholder="cre8core_support"
+                                                    value={formData.telegram}
+                                                    onChange={handleChange}
+                                                    className="w-full pl-8 pr-4 py-6 rounded-xl border-gray-200 focus:border-[#E4B95C] focus:ring-[#E4B95C]/20 transition-all font-medium"
+                                                />
+                                            </div>
+                                        </div>
                                     </div>
 
                                     <div className="space-y-2">

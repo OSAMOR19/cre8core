@@ -14,6 +14,7 @@ import {
 } from "@/components/ui/dialog";
 import { CheckCircle2 } from "lucide-react";
 import ConfirmationModal from "@/components/common/ConfirmationModal";
+import SubmissionsList from "@/components/admin/SubmissionsList";
 
 const AdminBounties = () => {
     const router = useRouter();
@@ -21,7 +22,7 @@ const AdminBounties = () => {
     const [loading, setLoading] = useState(true);
     const [successModalOpen, setSuccessModalOpen] = useState(false);
     const [successMessage, setSuccessMessage] = useState("");
-    const [activeTab, setActiveTab] = useState<"pending" | "live">("pending");
+    const [activeTab, setActiveTab] = useState<"pending" | "live" | "submissions">("pending");
 
     // Confirmation Modal State
     const [confirmState, setConfirmState] = useState<{
@@ -168,10 +169,10 @@ const AdminBounties = () => {
             <h1 className="text-3xl font-bold mb-6">Admin Portal</h1>
 
             {/* Tabs */}
-            <div className="flex gap-4 mb-8 border-b border-gray-200 pb-4">
+            <div className="flex gap-4 mb-8 border-b border-gray-200 pb-4 overflow-x-auto">
                 <button
                     onClick={() => setActiveTab("pending")}
-                    className={`px-6 py-2 rounded-full font-medium transition-colors ${activeTab === "pending"
+                    className={`px-6 py-2 rounded-full font-medium transition-colors whitespace-nowrap ${activeTab === "pending"
                             ? "bg-[#EBB643] text-black"
                             : "bg-gray-100 text-gray-600 hover:bg-gray-200"
                         }`}
@@ -180,22 +181,35 @@ const AdminBounties = () => {
                 </button>
                 <button
                     onClick={() => setActiveTab("live")}
-                    className={`px-6 py-2 rounded-full font-medium transition-colors ${activeTab === "live"
+                    className={`px-6 py-2 rounded-full font-medium transition-colors whitespace-nowrap ${activeTab === "live"
                             ? "bg-[#EBB643] text-black"
                             : "bg-gray-100 text-gray-600 hover:bg-gray-200"
                         }`}
                 >
                     Live Bounties
                 </button>
+                <button
+                    onClick={() => setActiveTab("submissions")}
+                    className={`px-6 py-2 rounded-full font-medium transition-colors whitespace-nowrap ${activeTab === "submissions"
+                            ? "bg-[#EBB643] text-black"
+                            : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                        }`}
+                >
+                    Submissions
+                </button>
             </div>
 
             <p className="text-gray-600 mb-8">
                 {activeTab === "pending"
                     ? "Review user-submitted bounties. Approved bounties will go live."
-                    : "Manage currently live bounties on the platform."}
+                    : activeTab === "live"
+                    ? "Manage currently live bounties on the platform."
+                    : "Review and manage user submissions for all bounties."}
             </p>
 
-            {loading ? (
+            {activeTab === "submissions" ? (
+                <SubmissionsList />
+            ) : loading ? (
                 <div className="flex justify-center p-10">
                     <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
                 </div>

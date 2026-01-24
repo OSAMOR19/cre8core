@@ -7,7 +7,7 @@ import FutureOfWeb3 from "@/components/common/Section/FutureOfWeb3";
 export default function Home() {
   return (
     <div className="overflow-x-hidden w-full">
-      <div className="max-w-[90%] mx-auto grid grid-cols-12 gap-8  my-5">
+      <div className="w-full px-4 md:max-w-[90%] md:px-0 mx-auto grid grid-cols-12 gap-4 md:gap-8 my-5">
         <div className="col-span-full lg:col-span-8">
           <MainContent />
         </div>

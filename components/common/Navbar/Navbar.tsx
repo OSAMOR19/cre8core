@@ -219,13 +219,13 @@ const Navbar = () => {
       {/* Mobile Menu */}
       {isMobileMenuOpen && (
         <div className="md:hidden absolute top-16 left-0 w-full bg-white border-b border-gray-100 shadow-lg z-50 flex flex-col p-4 space-y-4">
-          <Link
+          {/* <Link
             href="/hackathon"
             className="text-slate-700 font-medium"
             onClick={() => setIsMobileMenuOpen(false)}
           >
             Hackathons
-          </Link>
+          </Link> */}
           <Link
             href="/bounties"
             className="text-slate-700 font-medium"
@@ -233,19 +233,26 @@ const Navbar = () => {
           >
             Bounties
           </Link>
-          <Link
+          {/* <Link
             href="/grants"
             className="text-slate-700 font-medium"
             onClick={() => setIsMobileMenuOpen(false)}
           >
             Grants
-          </Link>
+          </Link> */}
           <Link
             href="/jobs"
             className="text-slate-700 font-medium"
             onClick={() => setIsMobileMenuOpen(false)}
           >
             Jobs
+          </Link>
+          <Link
+            href="/waitlist"
+            className="text-slate-700 font-medium"
+            onClick={() => setIsMobileMenuOpen(false)}
+          >
+            Waitlist
           </Link>
           <Link
             href="/about"

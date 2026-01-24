@@ -113,11 +113,11 @@ const CreateJobPage = () => {
   };
 
   return (
-    <div className="border p-6 max-w-[80%] my-16 rounded-2xl mx-auto">
+    <div className="border p-6 md:p-10 w-full max-w-5xl px-4 md:px-0 my-10 md:my-16 rounded-2xl mx-auto">
       {/* ... (keep existing JSX content inside the div) */}
       <div>
         <div>
-          <h1 className="text-[32px] font-bold">Post a Job</h1>
+          <h1 className="text-3xl md:text-[32px] font-bold">Post a Job</h1>
           <p className="text-[#666666] text-sm font-montserrat">
             Find the best Web3 talent on BASE blockchain
           </p>
@@ -126,7 +126,7 @@ const CreateJobPage = () => {
           <div className="flex flex-col space-y-6 mt-10 ">
             <div className="bg-white p-6 rounded-2xl space-y-6">
               <div>
-                <h1 className="text-[24px] flex items-center gap-2 ">
+                <h1 className="text-xl md:text-[24px] flex items-center gap-2 ">
                   <PiSuitcaseSimpleLight size={24} color="#DCBD7A" /> Job
                   Details
                 </h1>

@@ -103,6 +103,9 @@ const CreateBounty = () => {
     if (modalState.type === "success") {
       router.push("/bounties");
     }
+    if (modalState.title === "Access Denied" || modalState.title === "Authentication Required") {
+        router.push("/");
+    }
   };
 
   const handleReview = (e: React.FormEvent) => {
@@ -167,18 +170,18 @@ const CreateBounty = () => {
   };
 
   return (
-    <div className="max-w-[80%] mx-auto my-10">
+    <div className="w-full max-w-5xl px-4 md:px-0 mx-auto my-10">
       <div className="flex flex-col items-center space-y-1 my-7 text-center">
-        <h1 className="text-[48px] font-bold">Post a Bounty</h1>
+        <h1 className="text-3xl md:text-5xl font-bold">Post a Bounty</h1>
         <p className="text-[#666666] text-sm font-montserrat">
           Create opportunities for talented creators and developers on Base
         </p>
       </div>
-      <div className="bg-white px-10 py-8 rounded-2xl shadow-sm border border-gray-100">
+      <div className="bg-white p-6 md:p-10 rounded-2xl shadow-sm border border-gray-100">
         <div>
           <form onSubmit={handleReview}>
             <div className="flex flex-col space-y-1 ">
-              <h1 className="text-[32px] font-semibold">Bounty Details</h1>
+              <h1 className="text-2xl md:text-[32px] font-semibold">Bounty Details</h1>
               <p className="text-[#666666] text-sm font-montserrat">
                 Fill in the information about your bounty or sprint
               </p>

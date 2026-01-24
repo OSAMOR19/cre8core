@@ -250,13 +250,13 @@ const Header = () => {
           </div>
 
           <div className="flex-1 overflow-y-auto py-6 px-6 flex flex-col space-y-6">
-            <Link
+            {/* <Link
               href="/hackathon"
               className="text-xl font-medium text-slate-800 hover:text-[#EBB643] transition-colors font-montserrat"
               onClick={() => setIsMobileMenuOpen(false)}
             >
               Hackathons
-            </Link>
+            </Link> */}
             <Link
               href="/bounties"
               className="text-xl font-medium text-slate-800 hover:text-[#EBB643] transition-colors font-montserrat"
@@ -264,19 +264,26 @@ const Header = () => {
             >
               Bounties
             </Link>
-            <Link
+            {/* <Link
               href="/grants"
               className="text-xl font-medium text-slate-800 hover:text-[#EBB643] transition-colors font-montserrat"
               onClick={() => setIsMobileMenuOpen(false)}
             >
               Grants
-            </Link>
+            </Link> */}
             <Link
               href="/jobs"
               className="text-xl font-medium text-slate-800 hover:text-[#EBB643] transition-colors font-montserrat"
               onClick={() => setIsMobileMenuOpen(false)}
             >
               Jobs
+            </Link>
+            <Link
+              href="/waitlist"
+              className="text-xl font-medium text-slate-800 hover:text-[#EBB643] transition-colors font-montserrat"
+              onClick={() => setIsMobileMenuOpen(false)}
+            >
+              Waitlist
             </Link>
             <Link
               href="/about"

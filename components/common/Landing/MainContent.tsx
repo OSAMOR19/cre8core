@@ -32,7 +32,7 @@ const MainContent = () => {
       >
         <div className="absolute inset-0 bg-black/40 md:bg-transparent" /> {/* Optional overlay for mobile readability */}
 
-        <div className="relative z-10 flex items-center h-full p-6 md:p-12">
+        <div className="relative z-10 flex items-center h-full p-4 sm:p-6 md:p-12">
           <div className="max-w-md md:max-w-xl text-center md:text-left mx-auto md:mx-0">
             <motion.div
               initial="initial"
@@ -42,27 +42,27 @@ const MainContent = () => {
             >
               <motion.h1
                 variants={fadeInUp}
-                className="text-4xl md:text-5xl text-[#D5DCEB] font-semibold mb-6 font-roboto leading-[1.2]"
+                className="text-4xl sm:text-5xl md:text-6xl text-[#D5DCEB] font-semibold mb-8 font-roboto leading-tight"
               >
                 Fueling the Creative Layer of
                 <span className="text-[#EBB643]"> {""}BASE</span>
               </motion.h1>
               <motion.p
                 variants={fadeInUp}
-                className="text-lg md:text-xl mb-8 font-montserrat text-gray-200"
+                className="text-lg sm:text-xl md:text-2xl mb-12 font-montserrat text-gray-200"
               >
                 One platform, infinite campaigns, endless creator rewards.
               </motion.p>
-              <motion.div variants={fadeInUp} className="flex flex-col sm:flex-row gap-4 justify-center md:justify-start">
+              <motion.div variants={fadeInUp} className="flex flex-col sm:flex-row gap-6 justify-center md:justify-start">
                 <Button
                   onClick={() => router.push("/bounties")}
-                  className="bg-[#DCBD7A] hover:bg-[#d9a532] text-[#030406] font-medium px-8 py-6 rounded-full font-montserrat text-lg transition-transform active:scale-95"
+                  className="bg-[#DCBD7A] hover:bg-[#d9a532] text-[#030406] font-medium px-6 py-4 sm:px-8 sm:py-6 rounded-full font-montserrat text-lg transition-transform active:scale-95"
                 >
                   Become a creator
                 </Button>
                 <Button
                   onClick={() => router.push("/bounties/create")}
-                  className="bg-transparent border border-[#DCBD7A] text-[#D9D9D9] hover:bg-white/10 font-medium px-8 py-6 rounded-full font-montserrat text-lg transition-transform active:scale-95"
+                  className="bg-transparent border border-[#DCBD7A] text-[#D9D9D9] hover:bg-white/10 font-medium px-6 py-4 sm:px-8 sm:py-6 rounded-full font-montserrat text-lg transition-transform active:scale-95"
                 >
                   Post a bounty
                 </Button>

@@ -40,6 +40,8 @@ export interface Profile {
     skills?: string[];
     role?: 'user' | 'admin' | 'project';
     email?: string;
+    twitter_handle?: string;
+    telegram_handle?: string;
 }
 
 export interface BountySubmission {
