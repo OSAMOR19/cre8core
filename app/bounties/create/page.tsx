@@ -104,7 +104,7 @@ const CreateBounty = () => {
       router.push("/bounties");
     }
     if (modalState.title === "Access Denied" || modalState.title === "Authentication Required") {
-        router.push("/");
+      router.push("/");
     }
   };
 
@@ -132,10 +132,25 @@ const CreateBounty = () => {
       const breakdown = prizes.map(p => `${p.position}: ${p.amount}`).join(", ");
       const formattedPrizePool = `${totalAmount} USDC (${breakdown})`;
 
+      // Verify Transaction
+      const verificationResponse = await fetch('/api/verify-payment', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ txHash }),
+      });
+
+      const verificationResult = await verificationResponse.json();
+
+      if (!verificationResponse.ok) {
+        throw new Error(verificationResult.error || 'Payment verification failed');
+      }
+
       const { data, error } = await supabase.from("bounties").insert([
         {
           title: formData.title,
-          description: `${formData.description}\n\n**Payment Verification**\nTx Hash: ${txHash}`,
+          description: `${formData.description}\n\n**Payment Verification**\nTx Hash: ${txHash}\nVerified: Yes`,
           category: formData.category,
           // type: formData.type, // Assuming type column might not exist or isn't used yet in DB based on previous code comment
           prize_pool: formattedPrizePool,
@@ -192,7 +207,7 @@ const CreateBounty = () => {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-start">
                 <div className="flex flex-col space-y-2">
                   <label className="font-medium">Project Logo</label>
-                  <div className="flex items-center space-x-4">
+                  <div className="flex flex-col sm:flex-row items-start sm:items-center space-y-3 sm:space-y-0 sm:space-x-4">
                     <div className="w-24 h-24 bg-gray-100 rounded-lg flex items-center justify-center overflow-hidden border border-gray-200">
                       {formData.imageUrl ? (
                         <img src={formData.imageUrl} alt="Project" className="w-full h-full object-cover" />
@@ -364,12 +379,12 @@ const CreateBounty = () => {
                 <Button
                   type="submit"
                   disabled={loading}
-                  className="bg-[#E4B95C] w-full text-black py-6 rounded-3xl text-sm hover:bg-[#E4B95C]/80 flex-1 font-semibold text-lg"
+                  className="bg-[#E4B95C] w-full text-black py-4 rounded-3xl text-lg hover:bg-[#E4B95C]/80 font-semibold flex-1"
                 >
                   {loading ? "Posting..." : "Post Bounty"}
                 </Button>
                 <button
-                  className="w-full md:w-[300px] border py-4 rounded-3xl border-[#E4B95C] text-sm text-black hover:bg-[#E4B95C]/10 font-medium"
+                  className="w-full border py-4 rounded-3xl border-[#E4B95C] text-lg text-black hover:bg-[#E4B95C]/10 font-semibold flex-1"
                   type="button"
                   onClick={() => router.back()}
                 >

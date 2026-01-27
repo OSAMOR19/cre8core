@@ -49,7 +49,7 @@ const BountyDetails = () => {
   }
 
   return (
-    <div className="max-w-[90%] mx-auto grid grid-cols-12 gap-4 my-10 overflow-hidden">
+    <div className="max-w-[90%] mx-auto grid grid-cols-12 gap-4 my-10">
       <motion.div
         initial={{ opacity: 0, x: -50 }}
         animate={{ opacity: 1, x: 0 }}

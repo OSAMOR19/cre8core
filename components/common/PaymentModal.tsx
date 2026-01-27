@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Wallet, Copy, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { TREASURY_WALLET_ADDRESS } from "@/lib/constants";
 
 interface PaymentModalProps {
     isOpen: boolean;
@@ -22,7 +23,7 @@ const PaymentModal: React.FC<PaymentModalProps> = ({
 }) => {
     const serviceFee = (bountyAmount * serviceFeePercent) / 100;
     const totalAmount = bountyAmount + serviceFee;
-    const paymentAddress = "0x742d35Cc6634C0532925a3b844Bc454e4438f44e"; // Example Address
+    const paymentAddress = TREASURY_WALLET_ADDRESS;
     const [copied, setCopied] = useState(false);
     const [txHash, setTxHash] = useState("");
 

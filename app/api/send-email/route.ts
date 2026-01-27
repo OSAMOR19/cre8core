@@ -1,22 +1,23 @@
 import { Resend } from 'resend';
 import { NextResponse } from 'next/server';
+import { SUPPORT_EMAIL } from '@/lib/constants';
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
 export async function POST(request: Request) {
-    const { name, email } = await request.json();
+  const { name, email } = await request.json();
 
-    if (!process.env.RESEND_API_KEY) {
-        console.warn("RESEND_API_KEY is not set. Skipping email send.");
-        return NextResponse.json({ message: "Email skipped (no API key)" });
-    }
+  if (!process.env.RESEND_API_KEY) {
+    console.warn("RESEND_API_KEY is not set. Skipping email send.");
+    return NextResponse.json({ message: "Email skipped (no API key)" });
+  }
 
-    try {
-        const { data, error } = await resend.emails.send({
-            from: 'Cre8Core <onboarding@resend.dev>', // Default testing domain
-            to: [email],
-            subject: 'Welcome to the Cre8Core Waitlist!',
-            html: `
+  try {
+    const { data, error } = await resend.emails.send({
+      from: 'Cre8Core <onboarding@resend.dev>', // Default testing domain
+      to: [email],
+      subject: 'Welcome to the Cre8Core Waitlist!',
+      html: `
         <div style="font-family: 'Montserrat', sans-serif; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
           <h1 style="color: #000; font-size: 24px; font-weight: bold; margin-bottom: 20px;">Welcome to the Revolution!</h1>
           
@@ -40,19 +41,20 @@ export async function POST(request: Request) {
           <div style="margin-top: 40px; border-top: 1px solid #eee; padding-top: 20px;">
             <p style="font-size: 14px; color: #888;">Best,</p>
             <p style="font-size: 14px; font-weight: bold; color: #E4B95C;">The Cre8Core Team</p>
+            <p style="font-size: 12px; color: #aaa;">Contact us: ${SUPPORT_EMAIL}</p>
           </div>
         </div>
       `,
-        });
+    });
 
-        if (error) {
-            console.error("Resend Error:", error);
-            return NextResponse.json({ error }, { status: 500 });
-        }
-
-        return NextResponse.json(data);
-    } catch (error) {
-        console.error("Email API Error:", error);
-        return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
+    if (error) {
+      console.error("Resend Error:", error);
+      return NextResponse.json({ error }, { status: 500 });
     }
+
+    return NextResponse.json(data);
+  } catch (error) {
+    console.error("Email API Error:", error);
+    return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
+  }
 }
