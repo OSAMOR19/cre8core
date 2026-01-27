@@ -7,11 +7,42 @@ import { TbMoneybag } from "react-icons/tb";
 import { motion } from "framer-motion";
 import { Bounty } from "@/lib/types";
 
+import { supabase } from "@/lib/supabase";
+import { Button } from "@/components/ui/button";
+
 interface MainBountyProps {
   bounty: Bounty | null;
 }
 
 const MainBounty: React.FC<MainBountyProps> = ({ bounty }) => {
+  const [isWinner, setIsWinner] = React.useState(false);
+  const [hasClaimed, setHasClaimed] = React.useState(false);
+
+  React.useEffect(() => {
+    const checkWinnerStatus = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user && bounty) {
+        const { data } = await supabase
+          .from("bounty_submissions")
+          .select("status")
+          .eq("bounty_id", bounty.id)
+          .eq("user_id", user.id)
+          .eq("status", "approved") // User is approved (Winner)
+          .single();
+
+        if (data) setIsWinner(true);
+      }
+    };
+    checkWinnerStatus();
+  }, [bounty]);
+
+  const handleClaim = () => {
+    // In a real automated system, this would trigger a smart contract transaction.
+    // Here, we simulate a claim request or instruct the user.
+    alert("Claim request received! Admins have been notified to process your payout.");
+    setHasClaimed(true);
+  };
+
   const fadeInUp = {
     initial: { opacity: 0, y: 20 },
     animate: { opacity: 1, y: 0 },
@@ -37,6 +68,33 @@ const MainBounty: React.FC<MainBountyProps> = ({ bounty }) => {
             </p>
           </span>
         </div>
+
+        {isWinner && (
+          <motion.div
+            initial={{ scale: 0.9, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            className="bg-green-50 border border-green-200 rounded-xl p-6 mb-6 text-center"
+          >
+            <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4 text-4xl">
+              🎉
+            </div>
+            <h3 className="text-2xl font-bold text-green-800 mb-2">Congratulations!</h3>
+            <p className="text-green-700 mb-6">
+              You have been selected as a winner for this bounty!
+            </p>
+            <Button
+              onClick={handleClaim}
+              disabled={hasClaimed}
+              className={`px-8 py-6 text-lg font-bold rounded-full transition-all
+                        ${hasClaimed
+                  ? "bg-gray-200 text-gray-500 cursor-not-allowed"
+                  : "bg-[#EBB643] text-black hover:bg-[#d9a532] shadow-lg hover:shadow-xl hover:-translate-y-1"
+                }`}
+            >
+              {hasClaimed ? "Claim Requested" : "Claim Reward"}
+            </Button>
+          </motion.div>
+        )}
 
         <div className="flex flex-col gap-3 md:flex-row justify-between my-4">
           <div className="flex flex-col md:flex-row md:items-center gap-2">

@@ -184,6 +184,13 @@ const Navbar = () => {
             {isProfileDropdownOpen && (
               <div className="absolute right-0 top-full mt-2 w-48 bg-white border border-gray-100 shadow-lg rounded-lg z-50 py-2">
                 <Link
+                  href="/project/dashboard"
+                  className="block px-4 py-2 text-slate-700 hover:bg-gray-50 transition-colors font-montserrat font-semibold text-[#E4B95C]"
+                  onClick={() => setIsProfileDropdownOpen(false)}
+                >
+                  Project Dashboard
+                </Link>
+                <Link
                   href="/profile"
                   className="block px-4 py-2 text-slate-700 hover:bg-gray-50 transition-colors font-montserrat"
                   onClick={() => setIsProfileDropdownOpen(false)}

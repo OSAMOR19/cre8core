@@ -15,6 +15,7 @@ import {
 import { CheckCircle2 } from "lucide-react";
 import ConfirmationModal from "@/components/common/ConfirmationModal";
 import SubmissionsList from "@/components/admin/SubmissionsList";
+import WaitlistTab from "@/components/admin/WaitlistTab";
 
 const AdminBounties = () => {
     const router = useRouter();
@@ -22,7 +23,7 @@ const AdminBounties = () => {
     const [loading, setLoading] = useState(true);
     const [successModalOpen, setSuccessModalOpen] = useState(false);
     const [successMessage, setSuccessMessage] = useState("");
-    const [activeTab, setActiveTab] = useState<"pending" | "live" | "submissions">("pending");
+    const [activeTab, setActiveTab] = useState<"pending" | "live" | "submissions" | "waitlist">("pending");
 
     // Confirmation Modal State
     const [confirmState, setConfirmState] = useState<{
@@ -36,8 +37,8 @@ const AdminBounties = () => {
     });
     const [actionLoading, setActionLoading] = useState(false);
 
-    const fetchBounties = async (status: "pending" | "live" | "submissions") => {
-        if (status === "submissions") {
+    const fetchBounties = async (status: "pending" | "live" | "submissions" | "waitlist") => {
+        if (status === "submissions" || status === "waitlist") {
             setLoading(false);
             return;
         }
@@ -173,8 +174,8 @@ const AdminBounties = () => {
                 <button
                     onClick={() => setActiveTab("pending")}
                     className={`px-6 py-2 rounded-full font-medium transition-colors whitespace-nowrap ${activeTab === "pending"
-                            ? "bg-[#EBB643] text-black"
-                            : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                        ? "bg-[#EBB643] text-black"
+                        : "bg-gray-100 text-gray-600 hover:bg-gray-200"
                         }`}
                 >
                     Pending Reviews
@@ -182,8 +183,8 @@ const AdminBounties = () => {
                 <button
                     onClick={() => setActiveTab("live")}
                     className={`px-6 py-2 rounded-full font-medium transition-colors whitespace-nowrap ${activeTab === "live"
-                            ? "bg-[#EBB643] text-black"
-                            : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                        ? "bg-[#EBB643] text-black"
+                        : "bg-gray-100 text-gray-600 hover:bg-gray-200"
                         }`}
                 >
                     Live Bounties
@@ -191,11 +192,20 @@ const AdminBounties = () => {
                 <button
                     onClick={() => setActiveTab("submissions")}
                     className={`px-6 py-2 rounded-full font-medium transition-colors whitespace-nowrap ${activeTab === "submissions"
-                            ? "bg-[#EBB643] text-black"
-                            : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                        ? "bg-[#EBB643] text-black"
+                        : "bg-gray-100 text-gray-600 hover:bg-gray-200"
                         }`}
                 >
                     Submissions
+                </button>
+                <button
+                    onClick={() => setActiveTab("waitlist")}
+                    className={`px-6 py-2 rounded-full font-medium transition-colors whitespace-nowrap ${activeTab === "waitlist"
+                        ? "bg-[#EBB643] text-black"
+                        : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                        }`}
+                >
+                    Waitlist
                 </button>
             </div>
 
@@ -203,12 +213,16 @@ const AdminBounties = () => {
                 {activeTab === "pending"
                     ? "Review user-submitted bounties. Approved bounties will go live."
                     : activeTab === "live"
-                    ? "Manage currently live bounties on the platform."
-                    : "Review and manage user submissions for all bounties."}
+                        ? "Manage currently live bounties on the platform."
+                        : activeTab === "waitlist"
+                            ? "View all users currently on the waitlist."
+                            : "Review and manage user submissions for all bounties."}
             </p>
 
             {activeTab === "submissions" ? (
                 <SubmissionsList />
+            ) : activeTab === "waitlist" ? (
+                <WaitlistTab />
             ) : loading ? (
                 <div className="flex justify-center p-10">
                     <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
@@ -264,7 +278,7 @@ const AdminBounties = () => {
                                         <p className="text-xs text-blue-600 font-mono break-all">
                                             {bounty.description.split("Tx Hash:")[1].trim()}
                                         </p>
-                                        <a 
+                                        <a
                                             href={`https://basescan.org/tx/${bounty.description.split("Tx Hash:")[1].trim()}`}
                                             target="_blank"
                                             rel="noopener noreferrer"

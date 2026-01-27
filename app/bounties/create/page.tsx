@@ -147,6 +147,9 @@ const CreateBounty = () => {
         throw new Error(verificationResult.error || 'Payment verification failed');
       }
 
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error("You must be logged in to post a bounty");
+
       const { data, error } = await supabase.from("bounties").insert([
         {
           title: formData.title,
@@ -158,7 +161,8 @@ const CreateBounty = () => {
           sponsor: formData.sponsor,
           status: "pending", // Keep as pending for now so it shows up in admin tab which filters for 'pending'
           winners_count: prizes.length,
-          image_url: formData.imageUrl
+          image_url: formData.imageUrl,
+          user_id: user.id
         },
       ]);
 

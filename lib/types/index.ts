@@ -27,6 +27,7 @@ export interface Bounty {
     description: string;
     status: string;
     image_url?: string;
+    user_id?: string;
 }
 
 export interface Profile {
