@@ -78,13 +78,24 @@ const AdminBounties = () => {
                 return;
             }
 
+            // check if user is admin in profiles
             const { data: profile } = await supabase
                 .from("profiles")
                 .select("role")
                 .eq("id", user.id)
                 .single();
 
-            if (profile?.role !== "admin") {
+            // check if user is in bounties_admins table
+            const { data: adminEntry } = await supabase
+                .from("bounties_admins")
+                .select("email")
+                .eq("email", user.email)
+                .single();
+
+            const isProfileAdmin = profile?.role === "admin";
+            const isBountyAdmin = !!adminEntry;
+
+            if (!isProfileAdmin && !isBountyAdmin) {
                 router.push("/"); // Not authorized
                 return;
             }
